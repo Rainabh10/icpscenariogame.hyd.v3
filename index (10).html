@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICP | 800 Jubilee · 4D Project Baseline</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oxford:#0D2748; --oxford2:#152f55; --oxford3:#1e3d6a;
+  --gold:#B78A1B; --gold2:#d4a82a; --gold3:#f5e9c8; --gold4:#fdf8ec;
+  --orange:#F48E27; --topaz:#FFD180; --ocean:#56BDA2; --ublue:#5395DB;
+  --jungle:#163235; --gray:#7F8183;
+  --green:#1a7a45; --green2:#56BDA2;
+  --red:#c04040; --red2:#e05a5a;
+  --cream:#faf8f3; --cream2:#f5f0e8;
+  --border:#e8e0cc; --border2:#f0ead8;
+  --txt:#0D2748; --txt2:#4a5568; --txt3:#7F8183;
+  --white:#fff;
+  --bar-h:22px;
+  --row-h:36px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Raleway',Arial,sans-serif;background:var(--cream);color:var(--txt);height:100vh;overflow:hidden;font-size:13px}
+
+/* scrollbars */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--cream2)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:0}
+
+/* ── HEADER ── */
+#hdr{
+  height:52px;background:var(--oxford);
+  border-bottom:2px solid var(--gold);
+  display:flex;align-items:center;padding:0 16px;gap:14px;
+  position:fixed;top:0;left:0;right:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:9px;border-right:1px solid rgba(183,138,27,.3);padding-right:14px}
+.logo svg{flex-shrink:0}
+.logo-text{color:var(--gold);font-weight:700;font-size:15px;letter-spacing:.12em}
+.logo-sub{color:rgba(183,138,27,.5);font-size:8px;letter-spacing:.18em;display:block;margin-top:-2px}
+.hdr-sep{width:1px;height:26px;background:rgba(183,138,27,.2)}
+.hdr-title{color:rgba(255,255,255,.7);font-size:11px;font-weight:600;letter-spacing:.06em}
+.hdr-title b{color:var(--gold)}
+.hdr-kpis{display:flex;gap:6px;margin-left:8px}
+.kpi{background:rgba(255,255,255,.06);border:1px solid rgba(183,138,27,.2);padding:3px 10px;text-align:center}
+.kpi-v{color:var(--gold);font-size:14px;font-weight:700;line-height:1}
+.kpi-l{color:rgba(255,255,255,.35);font-size:8px;letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+.kpi.red .kpi-v{color:#e05a5a}
+.kpi.grn .kpi-v{color:var(--ocean)}
+.hdr-r{margin-left:auto;display:flex;gap:5px;align-items:center}
+.bdg{font-size:9px;font-weight:700;padding:3px 8px;text-transform:uppercase;letter-spacing:.07em;font-family:'Raleway',Arial,sans-serif}
+.b-live{background:var(--gold);color:var(--oxford)}
+.b-sc{background:var(--orange);color:#fff;display:none}
+.b-saved{background:var(--ocean);color:#fff;display:none}
+.hbtn{
+  background:rgba(183,138,27,.12);border:1px solid rgba(183,138,27,.3);
+  color:rgba(255,255,255,.55);font-size:9px;font-weight:700;
+  padding:5px 11px;cursor:pointer;font-family:'Raleway',Arial,sans-serif;
+  text-transform:uppercase;letter-spacing:.07em;transition:all .15s;white-space:nowrap;
+}
+.hbtn:hover,.hbtn.on{background:var(--gold);border-color:var(--gold);color:var(--oxford)}
+.hbtn.danger{background:rgba(192,64,64,.15);border-color:rgba(192,64,64,.4);color:#e05a5a;display:none}
+.hbtn.danger:hover{background:var(--red);color:#fff}
+
+/* ── LAYOUT ── */
+#app{position:fixed;top:52px;left:0;right:0;bottom:0;display:flex}
+
+/* ── LEFT: Task Schedule List ── */
+#left{
+  width:280px;flex-shrink:0;background:var(--white);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+  z-index:10;
+}
+.panel-hdr{
+  background:var(--oxford);padding:9px 14px;
+  border-bottom:1px solid var(--gold);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-hdr-title{color:var(--gold);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.panel-hdr-count{color:rgba(255,255,255,.5);font-size:10px;font-weight:600}
+.filter-bar{padding:7px 10px;border-bottom:1px solid var(--border2);display:flex;gap:5px}
+.fbtn{
+  flex:1;padding:4px 6px;background:var(--cream);border:1px solid var(--border);
+  color:var(--txt3);font-size:9px;font-weight:700;cursor:pointer;
+  font-family:'Raleway',Arial,sans-serif;text-transform:uppercase;letter-spacing:.06em;
+  transition:all .12s;
+}
+.fbtn:hover{border-color:var(--gold);color:var(--gold)}
+.fbtn.on{background:var(--oxford);border-color:var(--oxford);color:var(--gold)}
+.fbtn.crit.on{background:var(--red);border-color:var(--red);color:#fff}
+.task-list{flex:1;overflow-y:auto}
+/* task rows */
+.trow{
+  display:flex;align-items:center;gap:0;
+  border-bottom:1px solid var(--border2);cursor:pointer;
+  transition:background .1s;min-height:var(--row-h);
+  position:relative;
+}
+.trow:hover{background:var(--gold4)}
+.trow.selected{background:rgba(183,138,27,.08);border-left:3px solid var(--gold)}
+.trow.crit-row{border-left:3px solid var(--red)}
+.trow.crit-row.selected{border-left:3px solid var(--gold)}
+.trow.done{opacity:.6}
+.trow.summary{background:var(--cream2)}
+.tr-indent{width:12px;flex-shrink:0}
+.tr-status{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin:0 6px}
+.tr-info{flex:1;min-width:0;padding:4px 0}
+.tr-prefix{font-size:8px;color:var(--txt3);font-family:Arial,monospace;letter-spacing:.05em}
+.tr-name{font-size:10px;font-weight:600;color:var(--txt);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr-name.crit{color:var(--red)}
+.tr-name.sum{font-weight:700;color:var(--oxford)}
+.tr-meta{display:flex;gap:4px;align-items:center;margin-top:1px}
+.tr-dur{font-size:9px;font-weight:700;color:var(--gold);font-family:Arial,monospace}
+.tr-date{font-size:8px;color:var(--txt3);font-family:Arial,monospace}
+.tr-pct{font-size:10px;font-weight:700;font-family:Arial,monospace;padding:0 8px;flex-shrink:0}
+.tr-bar-wrap{width:100%;height:3px;background:var(--border2);position:absolute;bottom:0;left:0}
+.tr-bar-fill{height:100%}
+
+/* ── MAIN CONTENT ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* view tabs */
+#view-tabs{
+  background:var(--cream2);border-bottom:2px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:0;
+}
+.vtab{
+  padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--txt3);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-2px;
+  transition:all .15s;font-family:'Raleway',Arial,sans-serif;
+}
+.vtab:hover{color:var(--gold)}
+.vtab.on{color:var(--oxford);border-bottom-color:var(--gold)}
+.view-spacer{flex:1}
+.today-indicator{font-size:9px;color:var(--txt3);font-weight:600;letter-spacing:.04em}
+.today-indicator span{color:var(--oxford);font-weight:700}
+
+/* ── FLOOR PLAN VIEW ── */
+#view-floor{flex:1;overflow:auto;padding:16px;display:none}
+#view-floor.active{display:block}
+.floor-wrap{position:relative;min-width:800px}
+#floor-svg{width:100%;cursor:pointer}
+/* zone styles injected via JS */
+
+/* ── GANTT VIEW ── */
+#view-gantt{flex:1;overflow:hidden;display:none;flex-direction:column}
+#view-gantt.active{display:flex}
+.gantt-inner{display:flex;flex:1;overflow:hidden}
+.gantt-labels{
+  width:220px;flex-shrink:0;border-right:2px solid var(--border);
+  overflow:hidden;background:var(--white);
+}
+.gantt-chart-wrap{flex:1;overflow:auto;position:relative}
+.gantt-hdr-row{
+  display:flex;height:36px;background:var(--oxford);
+  border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:5;
+}
+.gantt-labels-hdr{
+  width:220px;flex-shrink:0;background:var(--oxford);
+  display:flex;align-items:center;padding:0 12px;
+  border-right:2px solid var(--gold);
+  font-size:9px;font-weight:700;color:var(--gold);
+  text-transform:uppercase;letter-spacing:.08em;
+}
+.g-month{
+  border-right:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:rgba(255,255,255,.5);
+  white-space:nowrap;overflow:hidden;padding:0 4px;
+}
+/* gantt rows */
+.grow{
+  display:flex;min-height:var(--row-h);border-bottom:1px solid var(--border2);
+  align-items:stretch;
+}
+.grow:hover .gl-cell{background:var(--gold4)}
+.grow:hover .gc-cell{background:rgba(183,138,27,.03)}
+.gl-cell{
+  width:220px;flex-shrink:0;display:flex;align-items:center;
+  padding:0 8px 0 4px;border-right:2px solid var(--border);
+  background:var(--white);cursor:pointer;
+  border-left:3px solid transparent;transition:background .1s;
+  gap:5px;
+}
+.gl-cell.crit{border-left-color:var(--red)}
+.gl-cell.sum{background:var(--cream2)}
+.gl-cell.sel{background:rgba(183,138,27,.1)!important;border-left-color:var(--gold)!important}
+.gl-status{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.gl-info{flex:1;min-width:0}
+.gl-prefix{font-size:7px;color:var(--txt3);font-family:Arial,monospace;letter-spacing:.04em;line-height:1}
+.gl-name{font-size:10px;font-weight:600;color:var(--txt);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gl-name.crit{color:var(--red)}
+.gl-name.sum{font-weight:700}
+.gl-dur{font-size:9px;font-weight:700;color:var(--gold);font-family:Arial,monospace;white-space:nowrap;flex-shrink:0}
+.gc-cell{
+  flex:1;position:relative;min-height:var(--row-h);
+  cursor:pointer;
+}
+.gc-cell.sum{background:rgba(13,39,72,.02)}
+/* gantt bar */
+.gbar{
+  position:absolute;top:50%;transform:translateY(-50%);
+  height:var(--bar-h);display:flex;align-items:center;
+  overflow:visible;z-index:2;
+}
+.gbar-track{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  border-radius:0;opacity:.18;
+}
+.gbar-fill{position:absolute;top:0;left:0;bottom:0;border-radius:0}
+.gbar-label{
+  position:absolute;left:calc(100% + 5px);
+  font-size:8px;font-weight:700;white-space:nowrap;
+  font-family:Arial,monospace;color:var(--txt2);
+  pointer-events:none;
+}
+.gbar-inline-label{
+  position:absolute;left:4px;right:4px;
+  font-size:8px;font-weight:700;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;color:var(--white);pointer-events:none;
+  line-height:var(--bar-h);
+}
+/* today line */
+.today-line{
+  position:absolute;top:0;bottom:0;width:2px;
+  background:var(--red);opacity:.7;z-index:10;pointer-events:none;
+}
+.today-label{
+  position:absolute;top:0;font-size:8px;font-weight:700;
+  color:var(--red);white-space:nowrap;padding:2px 3px;
+  background:rgba(255,255,255,.9);z-index:11;pointer-events:none;
+}
+/* grid lines */
+.grid-line{
+  position:absolute;top:0;bottom:0;width:1px;
+  background:var(--border2);opacity:.8;pointer-events:none;z-index:1;
+}
+
+/* ── RIGHT: Scenario Panel ── */
+#right{
+  width:280px;flex-shrink:0;background:var(--white);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.rp-hdr{background:var(--oxford);padding:10px 14px;border-bottom:1px solid var(--gold)}
+.rp-title{color:var(--gold);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.rp-sub{color:rgba(255,255,255,.4);font-size:9px;margin-top:2px;letter-spacing:.04em}
+/* task detail in right */
+.rp-body{flex:1;overflow-y:auto;padding:12px}
+.rp-zone-name{font-size:13px;font-weight:700;color:var(--oxford);border-left:3px solid var(--gold);padding-left:8px;margin-bottom:6px;line-height:1.3}
+.rp-zone-sub{font-size:10px;color:var(--txt3);margin-bottom:12px;letter-spacing:.04em;text-transform:uppercase}
+.rp-pct{font-size:36px;font-weight:300;text-align:center;padding:6px 0;color:var(--oxford)}
+.rp-track{height:5px;background:var(--border2);margin:0 0 12px;overflow:hidden}
+.rp-fill{height:100%;transition:width .4s}
+.sec-title{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--txt3);margin:10px 0 6px;display:flex;align-items:center;gap:6px;
+}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border2)}
+/* scenario editor */
+.sc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin-bottom:3px}
+.sc-inp{
+  width:100%;background:var(--cream);border:1px solid var(--border);
+  padding:6px 9px;color:var(--txt);font-family:'Raleway',Arial,sans-serif;font-size:11px;
+  outline:none;border-radius:0;transition:border-color .15s;
+  margin-bottom:8px;
+}
+.sc-inp:focus{border-color:var(--gold);background:var(--white)}
+.sc-2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.sc-btn{
+  width:100%;border:none;padding:9px;font-family:'Raleway',Arial,sans-serif;
+  font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;
+}
+.sc-apply{background:var(--oxford);color:var(--gold);border:1px solid var(--gold)}
+.sc-apply:hover{background:var(--gold);color:var(--oxford)}
+.sc-save{background:transparent;color:var(--txt2);border:1px solid var(--border)}
+.sc-save:hover{border-color:var(--oxford);color:var(--oxford)}
+.sc-reset{background:transparent;color:var(--red);border:1px solid rgba(192,64,64,.3)}
+.sc-reset:hover{background:rgba(192,64,64,.06)}
+/* impact box */
+.impact{background:var(--gold4);border:1px solid var(--gold3);border-left:3px solid var(--gold);padding:10px;margin:8px 0;display:none}
+.impact.show{display:block}
+.imp-ttl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-bottom:6px}
+.imp-row{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px solid rgba(183,138,27,.15)}
+.imp-row:last-child{border-bottom:none}
+.imp-k{color:var(--txt3)}
+.imp-v{font-weight:700;font-family:Arial,monospace}
+/* saved scenarios */
+.sc-saved-item{
+  background:var(--cream);border:1px solid var(--border);
+  border-left:3px solid transparent;padding:8px 10px;margin-bottom:6px;
+  cursor:pointer;transition:all .12s;
+}
+.sc-saved-item:hover{border-left-color:var(--gold);background:var(--gold4)}
+.sc-saved-name{font-size:11px;font-weight:700;color:var(--oxford)}
+.sc-saved-meta{font-size:9px;color:var(--txt3);margin-top:2px}
+.sc-saved-delta{font-size:11px;font-weight:700;font-family:Arial,monospace;margin-top:3px}
+/* panel tabs inside right */
+.rtabs{display:flex;border-bottom:1px solid var(--border)}
+.rtab{
+  flex:1;padding:7px 4px;font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--txt3);cursor:pointer;text-align:center;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;
+}
+.rtab.on{color:var(--oxford);border-bottom-color:var(--gold)}
+.rtab:hover{color:var(--gold)}
+
+/* result banner */
+#rbanner{
+  background:var(--oxford);border-bottom:2px solid var(--ocean);
+  padding:7px 16px;display:none;align-items:center;gap:14px;flex-wrap:wrap;
+}
+#rbanner.show{display:flex}
+.rb-item{display:flex;flex-direction:column;align-items:center}
+.rb-val{font-size:17px;font-weight:700;line-height:1;color:var(--white)}
+.rb-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-top:1px}
+.rb-note{font-size:10px;color:rgba(255,255,255,.5);margin-left:auto}
+/* legend */
+.legend-bar{
+  background:var(--cream2);border-top:1px solid var(--border);
+  padding:6px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;
+}
+.leg{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em}
+.leg-dot{width:12px;height:8px;flex-shrink:0}
+/* phase progress in right panel */
+.phase-row{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.phl{font-size:9px;color:var(--txt3);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ph-track{flex:1;height:4px;background:var(--border2);overflow:hidden}
+.ph-fill{height:100%;transition:width .4s}
+.ph-pct{font-size:9px;font-weight:700;font-family:Arial,monospace;width:28px;text-align:right}
+/* task pill in right */
+.task-pill{
+  display:flex;align-items:center;gap:5px;padding:4px 7px;
+  background:var(--cream);border:1px solid var(--border);
+  border-left:2px solid transparent;margin-bottom:3px;
+  cursor:pointer;font-size:9px;transition:all .1s;
+}
+.task-pill:hover{border-left-color:var(--gold);background:var(--gold4)}
+.task-pill.crit-p{border-left-color:var(--red)}
+.tp-prefix{font-family:Arial,monospace;color:var(--txt3);flex-shrink:0}
+.tp-name{flex:1;color:var(--txt);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tp-pct{font-weight:700;font-family:Arial,monospace;flex-shrink:0}
+
+/* floor plan specific */
+.fp-zone{cursor:pointer;transition:all .2s}
+.fp-zone:hover{filter:brightness(.85)}
+.fp-zone.selected{stroke:#B78A1B!important;stroke-width:2.5px!important}
+.fp-label{font-family:'Raleway',Arial,sans-serif;font-size:9px;font-weight:700;pointer-events:none;text-anchor:middle;dominant-baseline:central}
+.fp-sublabel{font-family:'Raleway',Arial,sans-serif;font-size:7.5px;pointer-events:none;text-anchor:middle;dominant-baseline:central;opacity:.8}
+.fp-pct-label{font-family:Arial,monospace;font-size:10px;font-weight:700;pointer-events:none;text-anchor:middle;dominant-baseline:central}
+.fp-today-marker{fill:none;stroke:var(--red);stroke-width:1.5;stroke-dasharray:4,3;opacity:.7}
+
+/* tooltip */
+#tooltip{
+  position:fixed;background:var(--oxford);border:1px solid var(--gold);
+  color:var(--white);padding:8px 12px;font-size:10px;
+  pointer-events:none;z-index:200;display:none;max-width:240px;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);
+}
+.tt-name{font-weight:700;color:var(--gold);font-size:11px;margin-bottom:4px}
+.tt-row{display:flex;justify-content:space-between;gap:12px;padding:2px 0;font-size:10px}
+.tt-k{color:rgba(255,255,255,.5)}
+.tt-v{font-weight:700;font-family:Arial,monospace}
+
+/* empty state */
+.empty-sc{font-size:11px;color:var(--txt3);font-style:italic;text-align:center;padding:20px 10px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <line x1="12" y1="2" x2="12" y2="22" stroke="#B78A1B" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="2" y1="12" x2="22" y2="12" stroke="#B78A1B" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="4.9" y1="4.9" x2="19.1" y2="19.1" stroke="#B78A1B" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="19.1" y1="4.9" x2="4.9" y2="19.1" stroke="#B78A1B" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="logo-text">ICP</div>
+      <span class="logo-sub">BUILDING LANDMARKS SINCE 1939</span>
+    </div>
+  </div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-title"><b>800 JUBILEE</b> · NUVAMA 4F · 4D PROJECT BASELINE</div>
+  <div class="hdr-kpis">
+    <div class="kpi"><div class="kpi-v" id="kpi-pct">30%</div><div class="kpi-l">Complete</div></div>
+    <div class="kpi red"><div class="kpi-v" id="kpi-crit">—</div><div class="kpi-l">Critical</div></div>
+    <div class="kpi"><div class="kpi-v" id="kpi-end">14 Jul</div><div class="kpi-l">Baseline End</div></div>
+    <div class="kpi grn"><div class="kpi-v" id="kpi-days">—</div><div class="kpi-l">Days Left</div></div>
+  </div>
+  <div class="hdr-r">
+    <span class="bdg b-live">● Live Zoho</span>
+    <span class="bdg b-sc" id="b-sc">⚡ Scenario Active</span>
+    <span class="bdg b-saved" id="b-saved">✓ Saved</span>
+    <button class="hbtn on" id="btn-crit" onclick="toggleCritical()">Critical Path</button>
+    <button class="hbtn" id="btn-today" onclick="scrollToToday()">Jump to Today</button>
+    <button class="hbtn danger" id="btn-reset" onclick="resetBaseline()">Reset Baseline</button>
+  </div>
+</div>
+
+<div id="app">
+
+<!-- LEFT: SCHEDULE LIST -->
+<div id="left">
+  <div class="panel-hdr">
+    <span class="panel-hdr-title">Schedule</span>
+    <span class="panel-hdr-count" id="task-count">60 tasks</span>
+  </div>
+  <div class="filter-bar">
+    <button class="fbtn on" id="f-all" onclick="setFilter('all',this)">All</button>
+    <button class="fbtn crit" id="f-crit" onclick="setFilter('crit',this)">Critical Path</button>
+    <button class="fbtn" id="f-active" onclick="setFilter('active',this)">In Progress</button>
+    <button class="fbtn" id="f-due" onclick="setFilter('due',this)">Overdue</button>
+  </div>
+  <div class="task-list" id="task-list"></div>
+</div>
+
+<!-- MAIN: VIEW AREA -->
+<div id="main">
+  <div id="view-tabs">
+    <div class="vtab on" id="tab-floor" onclick="switchView('floor')">Floor Plan</div>
+    <div class="vtab" id="tab-gantt" onclick="switchView('gantt')">Gantt Chart</div>
+    <div class="view-spacer"></div>
+    <div class="today-indicator">Today: <span>27 Mar 2026</span></div>
+  </div>
+
+  <div id="rbanner">
+    <div class="rb-item"><div class="rb-val" id="rb-base">14 Jul '26</div><div class="rb-lbl">Baseline</div></div>
+    <div style="color:rgba(255,255,255,.3);font-size:16px">→</div>
+    <div class="rb-item"><div class="rb-val" id="rb-new">—</div><div class="rb-lbl">Scenario End</div></div>
+    <div class="rb-item"><div class="rb-val" id="rb-delta">—</div><div class="rb-lbl">Change</div></div>
+    <div class="rb-note" id="rb-note"></div>
+    <button class="hbtn" onclick="document.getElementById('rbanner').classList.remove('show')" style="margin-left:auto">×</button>
+  </div>
+
+  <!-- FLOOR PLAN VIEW -->
+  <div id="view-floor" class="active">
+    <div class="floor-wrap" id="floor-wrap">
+      <!-- SVG injected by JS -->
+    </div>
+  </div>
+
+  <!-- GANTT VIEW -->
+  <div id="view-gantt">
+    <div class="gantt-inner">
+      <div class="gantt-labels" id="gantt-labels"></div>
+      <div class="gantt-chart-wrap" id="gantt-chart-wrap">
+        <div id="gantt-chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEGEND BAR -->
+  <div class="legend-bar">
+    <div class="leg"><div class="leg-dot" style="background:#1a7a45"></div>Completed</div>
+    <div class="leg"><div class="leg-dot" style="background:#5395DB"></div>In Progress</div>
+    <div class="leg"><div class="leg-dot" style="background:#B78A1B"></div>Not Started</div>
+    <div class="leg"><div class="leg-dot" style="background:#c04040"></div>Critical Path</div>
+    <div class="leg"><div class="leg-dot" style="background:#F48E27"></div>Overdue</div>
+    <div class="leg" style="margin-left:auto"><div class="leg-dot" style="background:#c04040;opacity:.5"></div>Today Line</div>
+    <div style="font-size:9px;color:var(--txt3);letter-spacing:.04em">Data: Zoho Projects · 27 Mar 2026 · CPM: 46 dependencies</div>
+  </div>
+</div>
+
+<!-- RIGHT: SCENARIO + DETAIL -->
+<div id="right">
+  <div class="rtabs">
+    <div class="rtab on" id="rt-detail" onclick="switchRTab('detail')">Zone Detail</div>
+    <div class="rtab" id="rt-scenario" onclick="switchRTab('scenario')">Scenario Calc</div>
+    <div class="rtab" id="rt-saved" onclick="switchRTab('saved')">Saved</div>
+  </div>
+
+  <!-- DETAIL TAB -->
+  <div id="rp-detail" style="flex:1;overflow-y:auto;padding:12px">
+    <div class="empty-sc">Click any zone on the floor plan<br>or a task in the schedule<br>to view details</div>
+  </div>
+
+  <!-- SCENARIO TAB -->
+  <div id="rp-scenario" style="flex:1;overflow-y:auto;padding:12px;display:none">
+    <div class="rp-zone-name" style="border-color:var(--oxford);font-size:11px;margin-bottom:8px">CPM Scenario Calculator</div>
+    <div style="font-size:10px;color:var(--txt3);line-height:1.7;margin-bottom:12px">
+      Adjust any task duration. The engine recalculates all 46 dependencies (FS/FF/SS/SF with lags) and shows the new projected completion date vs baseline <b>14 Jul '26</b>.
+    </div>
+    <div class="sc-lbl">Select task to modify</div>
+    <select class="sc-inp" id="sc-sel" onchange="onTaskSel()">
+      <option value="">— choose a task —</option>
+    </select>
+    <div id="sc-form" style="display:none">
+      <div class="sc-2">
+        <div>
+          <div class="sc-lbl">Current duration (d)</div>
+          <input class="sc-inp" id="sc-cur" type="number" readonly style="opacity:.5;cursor:not-allowed">
+        </div>
+        <div>
+          <div class="sc-lbl">New duration (d)</div>
+          <input class="sc-inp" id="sc-new" type="number" min="1" oninput="previewImpact()">
+        </div>
+      </div>
+      <div class="sc-lbl">Compression % (neg = faster)</div>
+      <input class="sc-inp" id="sc-pct" type="number" placeholder="e.g. -20 for 20% faster" oninput="fromPct()">
+      <div class="impact" id="impact">
+        <div class="imp-ttl">Projected Impact</div>
+        <div id="impact-rows"></div>
+      </div>
+      <div class="sc-lbl">Scenario label</div>
+      <input class="sc-inp" id="sc-name" type="text" placeholder="e.g. Compress partitions 20%">
+      <button class="sc-btn sc-apply" onclick="applyScenario()">Apply to Gantt + Floor Plan</button>
+      <button class="sc-btn sc-save" onclick="saveScenario()">Save Scenario</button>
+      <button class="sc-btn sc-reset" onclick="resetBaseline()">Reset to Baseline</button>
+    </div>
+  </div>
+
+  <!-- SAVED TAB -->
+  <div id="rp-saved" style="flex:1;overflow-y:auto;padding:12px;display:none">
+    <div class="rp-zone-name" style="border-color:var(--ocean);font-size:11px;margin-bottom:8px">Saved Scenarios</div>
+    <div id="saved-list">
+      <div class="empty-sc">No scenarios saved yet.<br>Use Scenario Calculator to create one.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #app -->
+<div id="tooltip"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// ICP BRAND COLOURS (from Signage Manual)
+// ═══════════════════════════════════════════════
+const C = {
+  oxford:'#0D2748', gold:'#B78A1B', orange:'#F48E27', topaz:'#FFD180',
+  ocean:'#56BDA2', ublue:'#5395DB', jungle:'#163235', gray:'#7F8183',
+  green:'#1a7a45', red:'#c04040', cream:'#faf8f3', white:'#fff', border:'#e8e0cc'
+};
+
+// Task status → colour mapping (matching ICP brand)
+function statusColor(t){
+  if(t.pct>=100) return C.green;
+  const today=new Date('2026-03-27');
+  if(t.e && new Date(t.e)<today && t.pct<100) return C.orange; // overdue
+  if(t.pct>0 || t.status.includes('Progress')) return C.ublue;
+  return C.gray;
+}
+
+// ═══════════════════════════════════════════════
+// LIVE ZOHO TASK DATA — 60 tasks (27 Mar 2026)
+// ═══════════════════════════════════════════════
+const BASE_TASKS=[
+{id:"793023",px:"N41-T64",n:"CAPEX budget approval",pct:100,s:"2025-10-24",e:"2025-10-24",dur:1,status:"Completed",ow:["Tarun"],depth:2,isSummary:false},
+{id:"793026",px:"N41-T65",n:"Layout + Design Spec + Approved make sign-off",pct:100,s:"2025-10-31",e:"2026-02-27",dur:86,status:"Completed",ow:["gaurav","Tarun"],depth:2,isSummary:false},
+{id:"793029",px:"N41-T66",n:"Security Deposit & Go ahead from M&L",pct:100,s:"2026-02-09",e:"2026-03-06",dur:20,status:"Completed",ow:["Tarun"],depth:2,isSummary:false},
+{id:"793014",px:"N41-T63",n:"Pre-Construction",pct:66,s:"2025-10-24",e:"2026-05-01",dur:136,status:"In Progress",ow:[],depth:1,isSummary:true},
+{id:"793032",px:"N41-T67",n:"Contracts & Work Award Stage",pct:34,s:"2026-02-06",e:"2026-05-01",dur:61,status:"In Progress",ow:[],depth:2,isSummary:true},
+{id:"793107",px:"N41-T68",n:"Design Brief & RFQ to Contracts",pct:100,s:"2026-03-04",e:"2026-03-10",dur:5,status:"Completed",ow:["sonu.kumar"],depth:3,isSummary:false},
+{id:"793110",px:"N41-T69",n:"Floating of RFQ to D&B vendors",pct:100,s:"2026-02-06",e:"2026-02-06",dur:1,status:"Completed",ow:["Vineeta"],depth:3,isSummary:false},
+{id:"793113",px:"N41-T70",n:"Work Award to D&B vendor (Suvidha)",pct:100,s:"2026-03-11",e:"2026-03-13",dur:3,status:"Completed",ow:["Vineeta","Tarun"],depth:3,isSummary:false},
+{id:"793116",px:"N41-T71",n:"Release of Advance payment",pct:100,s:"2026-03-20",e:"2026-03-20",dur:0,status:"Completed",ow:["Ravinder"],depth:3,isSummary:false},
+{id:"793119",px:"N41-T72",n:"POs for Bought out items",pct:0,s:"2026-04-06",e:"2026-04-28",dur:17,status:"Yet to Start",ow:["Vineeta","sonu.kumar"],depth:3,isSummary:false},
+{id:"793035",px:"N41-T73",n:"Design Development Stage (D&B)",pct:76,s:"2026-03-13",e:"2026-04-06",dur:17,status:"In Progress",ow:[],depth:2,isSummary:true},
+{id:"793122",px:"N41-T74",n:"Kick-off + Handover of Approved layout",pct:100,s:"2026-03-13",e:"2026-03-16",dur:2,status:"Completed",ow:["sonu.kumar"],depth:3,isSummary:false},
+{id:"793125",px:"N41-T75",n:"Concept development + 3Ds (D&B)",pct:100,s:"2026-03-19",e:"2026-03-23",dur:3,status:"Completed",ow:["sonu.kumar"],depth:3,isSummary:false},
+{id:"793128",px:"N41-T76",n:"Approval of Concept",pct:100,s:"2026-03-24",e:"2026-03-25",dur:2,status:"Completed",ow:["gaurav"],depth:3,isSummary:false},
+{id:"793131",px:"N41-T77",n:"Detailed Drawings + Finishing schedule",pct:80,s:"2026-03-19",e:"2026-04-01",dur:10,status:"In Progress",ow:["sonu.kumar"],depth:3,isSummary:false},
+{id:"793134",px:"N41-T78",n:"Comments + approval of Detail drawings",pct:10,s:"2026-04-02",e:"2026-04-03",dur:2,status:"In Progress",ow:["gaurav","sonu.kumar"],depth:3,isSummary:false},
+{id:"793137",px:"N41-T79",n:"GFC Issuance to Site team",pct:0,s:"2026-04-06",e:"2026-04-06",dur:1,status:"In Progress",ow:["sonu.kumar"],depth:3,isSummary:false},
+{id:"793038",px:"N41-T80",n:"Sample board & Furniture approval",pct:0,s:"2026-03-19",e:"2026-04-07",dur:14,status:"In Progress",ow:["gaurav"],depth:2,isSummary:false},
+{id:"793041",px:"N41-T81",n:"Signages design approval",pct:0,s:"2026-03-19",e:"2026-04-07",dur:14,status:"In Progress",ow:["gaurav"],depth:2,isSummary:false},
+{id:"793017",px:"N41-T82",n:"Construction (Fit-out)",pct:3,s:"2025-11-20",e:"2026-07-14",dur:169,status:"In Progress",ow:[],depth:1,isSummary:true},
+{id:"793104",px:"N41-T83",n:"Terrace Waterproofing issues",pct:0,s:"2025-11-20",e:"2025-12-13",dur:18,status:"Yet to Start",ow:["Pankaj"],depth:2,isSummary:false},
+{id:"793044",px:"N41-T84",n:"Workforce mobilization",pct:100,s:"2026-03-13",e:"2026-03-18",dur:4,status:"Completed",ow:[],depth:2,isSummary:false},
+{id:"793047",px:"N41-T85",n:"Protection of elements",pct:100,s:"2026-03-19",e:"2026-03-20",dur:2,status:"Completed",ow:[],depth:2,isSummary:false},
+{id:"793050",px:"N41-T86",n:"Dismantling & Clearance (Washrooms)",pct:20,s:"2026-03-23",e:"2026-03-26",dur:4,status:"In Progress",ow:[],depth:2,isSummary:false},
+{id:"793053",px:"N41-T87",n:"Layout marking & approval",pct:20,s:"2026-03-19",e:"2026-03-23",dur:3,status:"In Progress",ow:[],depth:2,isSummary:false},
+{id:"793056",px:"N41-T88",n:"Civil MEP: Washroom + Pantry",pct:0,s:"2026-03-24",e:"2026-05-15",dur:39,status:"Yet to Start",ow:[],depth:2,isSummary:true},
+{id:"793140",px:"N41-T89",n:"Brickwork (Washroom)",pct:0,s:"2026-03-24",e:"2026-04-01",dur:7,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793143",px:"N41-T90",n:"Plaster works",pct:0,s:"2026-03-31",e:"2026-04-06",dur:5,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793146",px:"N41-T91",n:"Waterproofing (Washroom)",pct:0,s:"2026-04-02",e:"2026-04-09",dur:6,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793149",px:"N41-T92",n:"uPVC Plumbing: Drainage",pct:0,s:"2026-04-15",e:"2026-04-17",dur:3,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793152",px:"N41-T93",n:"Filling + waterproofing + base flooring",pct:0,s:"2026-04-20",e:"2026-04-21",dur:2,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793155",px:"N41-T94",n:"cPVC plumbing: water supply",pct:0,s:"2026-04-27",e:"2026-04-29",dur:3,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793158",px:"N41-T95",n:"Electrical concealed: Conduits + Boxes",pct:0,s:"2026-04-27",e:"2026-04-29",dur:3,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793161",px:"N41-T96",n:"Wall tiling",pct:0,s:"2026-04-30",e:"2026-05-11",dur:8,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793164",px:"N41-T97",n:"Floor tiling",pct:0,s:"2026-05-12",e:"2026-05-15",dur:4,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793059",px:"N41-T98",n:"Civil MEP: Office areas",pct:0,s:"2026-03-24",e:"2026-04-15",dur:17,status:"Yet to Start",ow:[],depth:2,isSummary:true},
+{id:"793167",px:"N41-T99",n:"Electrical Raceways: Chassing + fixing",pct:0,s:"2026-03-24",e:"2026-04-08",dur:12,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793170",px:"N41-T100",n:"Floor screeding (wooden + carpet base)",pct:0,s:"2026-04-02",e:"2026-04-15",dur:10,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793062",px:"N41-T101",n:"MEP: Fire Fighting (Sprinkler+FHC+FAS)",pct:0,s:"2026-03-24",e:"2026-04-15",dur:17,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793065",px:"N41-T102",n:"MEP: HVAC SITC",pct:0,s:"2026-03-24",e:"2026-04-15",dur:17,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793068",px:"N41-T103",n:"Framing Partitions + Panelling + Glazing",pct:0,s:"2026-04-13",e:"2026-05-05",dur:17,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793071",px:"N41-T104",n:"MEP works: Electrical",pct:0,s:"2026-04-29",e:"2026-05-28",dur:22,status:"Yet to Start",ow:[],depth:2,isSummary:true},
+{id:"793173",px:"N41-T105",n:"Exposed conduit + GI boxes",pct:0,s:"2026-04-29",e:"2026-05-14",dur:12,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793176",px:"N41-T106",n:"LV + Electrical cabling",pct:0,s:"2026-05-08",e:"2026-05-25",dur:12,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793179",px:"N41-T107",n:"DB dressing + ferruling + UPS",pct:0,s:"2026-05-22",e:"2026-05-28",dur:5,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793074",px:"N41-T108",n:"Closing Partitions + Claddings + Glazing",pct:0,s:"2026-05-08",e:"2026-05-25",dur:12,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793077",px:"N41-T109",n:"First Coat of Painting & Polishing",pct:0,s:"2026-05-19",e:"2026-06-03",dur:12,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793080",px:"N41-T110",n:"MEP Fixtures: Lights + Sanitary + CP",pct:0,s:"2026-05-18",e:"2026-06-08",dur:16,status:"Yet to Start",ow:[],depth:2,isSummary:true},
+{id:"793182",px:"N41-T111",n:"MEP Fixtures: Washroom + Pantry",pct:0,s:"2026-05-18",e:"2026-05-19",dur:2,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793185",px:"N41-T112",n:"MEP Fixtures: Office Area",pct:0,s:"2026-06-04",e:"2026-06-08",dur:3,status:"Yet to Start",ow:[],depth:3,isSummary:false},
+{id:"793083",px:"N41-T113",n:"Self leveling (carpet + wooden base)",pct:0,s:"2026-06-09",e:"2026-06-11",dur:3,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793086",px:"N41-T114",n:"Carpet Flooring (with Protection)",pct:0,s:"2026-06-12",e:"2026-06-15",dur:2,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793089",px:"N41-T115",n:"Wooden flooring (with protection)",pct:0,s:"2026-06-12",e:"2026-06-15",dur:2,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793092",px:"N41-T116",n:"Fixed Furniture: work stations",pct:0,s:"2026-06-16",e:"2026-06-24",dur:7,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793095",px:"N41-T117",n:"Final Painting, Polishing + cleaning",pct:0,s:"2026-06-25",e:"2026-07-03",dur:7,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793098",px:"N41-T118",n:"Loose Furniture & Furnishing (Blinds)",pct:0,s:"2026-07-06",e:"2026-07-09",dur:4,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793101",px:"N41-T119",n:"Signages: Installation",pct:0,s:"2026-07-06",e:"2026-07-08",dur:3,status:"Yet to Start",ow:[],depth:2,isSummary:false},
+{id:"793020",px:"N41-T120",n:"Deep Cleaning & Handover",pct:0,s:"2026-07-02",e:"2026-07-08",dur:5,status:"Yet to Start",ow:[],depth:1,isSummary:false},
+];
+
+// Critical path task IDs (identified from CPM forward pass)
+const CRIT_IDS=new Set(["793053","793062","793065","793068","793173","793176","793179","793074","793077","793185","793083","793086","793092","793095","793020","793140","793143","793146","793149","793152","793161","793164"]);
+
+// Dependency map
+const DEPS={"793029":[{"pred":"793026","type":"FF","lag":7}],"793038":[{"pred":"793128","type":"FS","lag":0}],"793041":[{"pred":"793128","type":"FS","lag":0}],"793044":[{"pred":"793113","type":"FS","lag":0}],"793047":[{"pred":"793044","type":"FS","lag":0}],"793050":[{"pred":"793047","type":"FS","lag":0}],"793053":[{"pred":"793044","type":"FS","lag":0},{"pred":"793125","type":"FS","lag":-1}],"793062":[{"pred":"793053","type":"FS","lag":0}],"793065":[{"pred":"793053","type":"FS","lag":0}],"793068":[{"pred":"793065","type":"FF","lag":14},{"pred":"793062","type":"FF","lag":14}],"793074":[{"pred":"793173","type":"FF","lag":7}],"793077":[{"pred":"793074","type":"FF","lag":7}],"793083":[{"pred":"793080","type":"FS","lag":0}],"793086":[{"pred":"793083","type":"FS","lag":0}],"793089":[{"pred":"793083","type":"FS","lag":0}],"793092":[{"pred":"793086","type":"FF","lag":7}],"793095":[{"pred":"793092","type":"FF","lag":7}],"793098":[{"pred":"793095","type":"FS","lag":0}],"793101":[{"pred":"793095","type":"FS","lag":0}],"793110":[{"pred":"793107","type":"FS","lag":0}],"793113":[{"pred":"793110","type":"FS","lag":0},{"pred":"793029","type":"FS","lag":0}],"793116":[{"pred":"793113","type":"FS","lag":0}],"793119":[{"pred":"793092","type":"SF","lag":-35}],"793122":[{"pred":"793113","type":"FS","lag":0}],"793125":[{"pred":"793122","type":"FS","lag":0}],"793128":[{"pred":"793125","type":"FS","lag":0}],"793131":[{"pred":"793128","type":"FS","lag":0}],"793134":[{"pred":"793131","type":"FS","lag":0}],"793137":[{"pred":"793134","type":"FS","lag":0}],"793140":[{"pred":"793053","type":"FS","lag":0}],"793143":[{"pred":"793140","type":"FF","lag":3}],"793146":[{"pred":"793143","type":"FF","lag":3}],"793149":[{"pred":"793146","type":"FS","lag":3}],"793152":[{"pred":"793149","type":"FS","lag":0}],"793155":[{"pred":"793152","type":"FS","lag":3}],"793158":[{"pred":"793152","type":"FS","lag":3}],"793161":[{"pred":"793155","type":"FS","lag":0},{"pred":"793158","type":"FS","lag":0}],"793164":[{"pred":"793161","type":"FS","lag":0}],"793167":[{"pred":"793053","type":"FS","lag":0}],"793170":[{"pred":"793167","type":"FF","lag":5}],"793173":[{"pred":"793068","type":"FF","lag":7}],"793176":[{"pred":"793173","type":"FF","lag":7}],"793179":[{"pred":"793176","type":"FF","lag":3}],"793182":[{"pred":"793164","type":"FS","lag":0}],"793185":[{"pred":"793077","type":"FS","lag":0}],"793020":[{"pred":"793095","type":"FF","lag":3}]};
+
+// Floor plan zones (matched to actual R7 drawing layout)
+// Coordinate system: floor is ~900×240 SVG units (proportional to ~55m×15m)
+const FLOOR_ZONES=[
+  {id:"core",label:"Core & Lifts",sub:"Existing",x:0,y:0,w:60,h:110,fill:"#d4cfc5",taskIds:[],isStruct:true},
+  {id:"toilets_gents",label:"Gents Toilet",sub:"314 sqft",x:0,y:110,w:60,h:65,taskIds:["793050","793140","793143","793146","793149","793152","793155","793158","793161","793164","793182"],isCrit:true},
+  {id:"toilets_ladies",label:"Ladies Toilet",sub:"176 sqft",x:0,y:175,w:60,h:65,taskIds:["793050","793140","793143","793146","793152","793161","793164","793182"],isCrit:true},
+  {id:"pantry",label:"Pantry 48 pax",sub:"701 sqft",x:60,y:120,w:130,h:120,taskIds:["793056","793155","793158","793161","793164","793182"],isCrit:false},
+  {id:"elec_hvac",label:"HVAC/Elec/UPS",sub:"229 sqft",x:60,y:0,w:130,h:120,fill:"#d0ccc4",taskIds:["793065","793071","793179"],isStruct:true},
+  {id:"corridor",label:"Common Corridor",sub:"1600mm",x:0,y:240,w:900,h:30,fill:"#e0dcd4",taskIds:[],isStruct:true},
+  {id:"reception",label:"Reception & Waiting",sub:"220 sqft",x:190,y:100,w:100,h:140,taskIds:["793053","793068","793074","793077","793095","793098"]},
+  {id:"disc1",label:"Disc Rm 1",sub:"4 pax",x:190,y:0,w:60,h:100,taskIds:["793053","793068","793074","793077","793095"]},
+  {id:"disc2",label:"Disc Rm 2",sub:"4 pax",x:250,y:0,w:60,h:100,taskIds:["793053","793068","793074","793077","793095"]},
+  {id:"disc3",label:"Disc Rm 3",sub:"4 pax · 79sqft",x:310,y:0,w:80,h:100,taskIds:["793053","793068","793074","793077","793095"]},
+  {id:"ws_enclosed",label:"Enclosed WS",sub:"27 pax · 620sqft",x:290,y:100,w:150,h:140,taskIds:["793053","793059","793167","793170","793068","793173","793176","793074","793077","793083","793086","793092","793095"],isCrit:true},
+  {id:"dealing",label:"Dealing Room",sub:"13 pax · 264sqft",x:440,y:0,w:110,h:100,taskIds:["793053","793059","793167","793170","793068","793074","793077","793083","793086","793092"],fill_base:"#e8e4f8"},
+  {id:"server",label:"Server Rm",sub:"125 sqft",x:440,y:100,w:70,h:70,fill:"#d4cfc5",taskIds:["793071","793179"],isStruct:true},
+  {id:"conference",label:"Conference Rm",sub:"16 pax · 442sqft",x:550,y:0,w:150,h:170,taskIds:["793053","793068","793074","793077","793083","793089","793092","793095"],isCrit:true},
+  {id:"ws_open1",label:"Open WS Zone 1",sub:"26 pax · 480sqft",x:440,y:170,w:110,h:70,taskIds:["793053","793059","793167","793170","793068","793173","793176","793074","793077","793083","793086","793092","793095"],isCrit:true},
+  {id:"ws_open2",label:"Open WS Zone 2",sub:"20 pax · 380sqft",x:700,y:0,w:110,h:120,taskIds:["793053","793059","793167","793068","793074","793077","793083","793086","793092"]},
+  {id:"ws_open3",label:"Open WS Zone 3",sub:"14 pax · 320sqft",x:700,y:120,w:110,h:120,taskIds:["793053","793059","793167","793068","793077","793083","793086"]},
+  {id:"cabins123",label:"Cabins 1, 2 & 3",sub:"225 sqft",x:510,y:170,w:190,h:70,taskIds:["793053","793068","793089","793095"]},
+  {id:"cabin4",label:"Cabin 4",sub:"78 sqft",x:810,y:0,w:90,h:120,taskIds:["793053","793068","793089","793095"]},
+  {id:"tenant2",label:"Tenant 2 Space",sub:"1755 sqft",x:810,y:120,w:90,h:120,fill:"#dddad2",taskIds:[],isStruct:true},
+];
+
+// ═══════════════════════════════════════════════
+// CPM ENGINE
+// ═══════════════════════════════════════════════
+function d2n(s){return s?Math.floor((new Date(s)-new Date('2025-10-01'))/86400000):0;}
+function n2d(n){const r=new Date('2025-10-01');r.setDate(r.getDate()+n);return r.toISOString().slice(0,10);}
+function fmtD(s){if(!s)return'—';const d=new Date(s);const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${d.getDate()} ${mn[d.getMonth()]} '${String(d.getFullYear()).slice(2)}`;}
+const TODAY_DAY=d2n('2026-03-27');
+const BASE_END_DAY=d2n('2026-07-14');
+
+function runCPM(tasksArr){
+  const T={};
+  tasksArr.forEach(t=>T[t.id]={...t,sd:d2n(t.s),ed:d2n(t.e),nsd:null,ned:null});
+  Object.values(T).forEach(t=>{if(t.pct>=100){t.nsd=t.sd;t.ned=t.ed;}});
+  const vis=new Set(),ord=[];
+  function visit(id){if(vis.has(id))return;vis.add(id);(DEPS[id]||[]).forEach(d=>visit(d.pred));ord.push(id);}
+  Object.keys(T).forEach(id=>visit(id));
+  ord.forEach(id=>{
+    const t=T[id];if(t.pct>=100)return;
+    const deps=DEPS[id]||[];
+    if(!deps.length){t.nsd=t.sd;t.ned=t.nsd+t.dur;return;}
+    let es=0;
+    deps.forEach(d=>{
+      const p=T[d.pred];if(!p)return;
+      const pEd=p.ned!==null?p.ned:p.ed,pSd=p.nsd!==null?p.nsd:p.sd;
+      let c=0;
+      switch(d.type){case'FS':c=pEd+d.lag;break;case'FF':c=pEd+d.lag-t.dur;break;case'SS':c=pSd+d.lag;break;case'SF':c=pSd+d.lag-t.dur;break;}
+      es=Math.max(es,c);
+    });
+    t.nsd=Math.max(es,t.sd);t.ned=t.nsd+t.dur;
+  });
+  Object.values(T).forEach(t=>{if(t.nsd===null)t.nsd=t.sd;if(t.ned===null)t.ned=t.nsd+t.dur;});
+  return T;
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let tasks=JSON.parse(JSON.stringify(BASE_TASKS));
+let computed=runCPM(tasks);
+let filter='all';
+let critMode=true; // on by default so critical path is visible
+let selTask=null;
+let selZone=null;
+let scenarioActive=false;
+let savedScenarios=[];
+let currentView='floor';
+let rTab='detail';
+
+// Update KPIs
+function updateKPIs(){
+  document.getElementById('kpi-pct').textContent=
+    Math.round(tasks.reduce((s,t)=>s+t.pct,0)/tasks.length)+'%';
+  document.getElementById('kpi-crit').textContent=
+    tasks.filter(t=>CRIT_IDS.has(t.id)&&t.pct<100).length;
+  const maxEnd=Math.max(...Object.values(computed).map(t=>t.ned||t.ed));
+  const endDate=new Date('2025-10-01');endDate.setDate(endDate.getDate()+maxEnd);
+  const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('kpi-end').textContent=endDate.getDate()+' '+mn[endDate.getMonth()];
+  const daysLeft=maxEnd-TODAY_DAY;
+  document.getElementById('kpi-days').textContent=daysLeft>0?daysLeft+'d':'Done!';
+}
+updateKPIs();
+
+// ═══════════════════════════════════════════════
+// TASK LIST (LEFT PANEL)
+// ═══════════════════════════════════════════════
+function setFilter(f,el){
+  filter=f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  renderTaskList();
+  if(currentView==='gantt')renderGantt();
+}
+
+function visibleTasks(){
+  const today=new Date('2026-03-27');
+  return tasks.filter(t=>{
+    if(filter==='crit') return CRIT_IDS.has(t.id);
+    if(filter==='active') return t.pct>0&&t.pct<100;
+    if(filter==='due') return t.e&&new Date(t.e)<today&&t.pct<100;
+    return true;
+  });
+}
+
+function taskBarColor(t){
+  if(t.pct>=100) return C.green;
+  const today=new Date('2026-03-27');
+  if(t.e&&new Date(t.e)<today&&t.pct<100) return C.orange;
+  if(critMode&&CRIT_IDS.has(t.id)) return C.red;
+  if(t.pct>0||t.status.includes('Progress')) return C.ublue;
+  return C.gray;
+}
+
+function renderTaskList(){
+  const vt=visibleTasks();
+  document.getElementById('task-count').textContent=vt.length+' tasks';
+  const html=vt.map(t=>{
+    const isCrit=CRIT_IDS.has(t.id);
+    const col=taskBarColor(t);
+    const isDone=t.pct>=100;
+    const ct=computed[t.id]||t;
+    const indent=t.depth||0;
+    return`<div class="trow${isCrit&&critMode?' crit-row':''}${isDone?' done':''}${t.isSummary?' summary':''}${selTask===t.id?' selected':''}"
+      onclick="selectTask('${t.id}')" onmouseenter="showTip(event,'${t.id}')" onmouseleave="hideTip()">
+      <div class="tr-indent" style="width:${(indent)*8}px"></div>
+      <div class="tr-status" style="background:${col}"></div>
+      <div class="tr-info">
+        <div class="tr-prefix">${t.px}</div>
+        <div class="tr-name${isCrit&&critMode?' crit':''}${t.isSummary?' sum':''}">${t.n}</div>
+        <div class="tr-meta">
+          <span class="tr-dur">${t.dur}d</span>
+          <span class="tr-date">${fmtD(ct.nsd!==null?n2d(ct.nsd):t.s)} → ${fmtD(ct.ned!==null?n2d(ct.ned):t.e)}</span>
+        </div>
+      </div>
+      <div class="tr-pct" style="color:${col}">${t.pct}%</div>
+      <div class="tr-bar-wrap"><div class="tr-bar-fill" style="width:${t.pct}%;background:${col}"></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('task-list').innerHTML=html;
+}
+renderTaskList();
+
+// ═══════════════════════════════════════════════
+// FLOOR PLAN (SVG)
+// ═══════════════════════════════════════════════
+function zonePct(zone){
+  if(zone.isStruct||!zone.taskIds||!zone.taskIds.length) return -1;
+  const avg=zone.taskIds.reduce((s,tid)=>{
+    const t=tasks.find(x=>x.id===tid);
+    return s+(t?t.pct:0);
+  },0)/zone.taskIds.length;
+  return Math.round(avg);
+}
+
+function zoneFill(zone,pct,isSelected){
+  if(zone.isStruct) return zone.fill||'#d4cfc5';
+  if(isSelected) return '#e8c98e';
+  const isCrit=zone.isCrit&&critMode&&pct<100;
+  if(isCrit) return '#fdeaea';
+  if(pct>=95) return '#d0edd8';
+  if(pct>=60) return '#d4eee7';
+  if(pct>=30) return '#fdf5e0';
+  if(pct>0)   return '#d8e8f8';
+  return zone.fill_base||'#f0ece0';
+}
+function zoneStroke(zone,pct,isSelected){
+  if(isSelected) return C.gold;
+  const isCrit=zone.isCrit&&critMode&&pct<100;
+  if(isCrit) return C.red;
+  if(pct>=95) return C.green;
+  if(pct>=60) return C.ocean;
+  if(pct>=30) return C.gold;
+  if(pct>0)   return C.ublue;
+  return '#b8b0a0';
+}
+function zoneTextColor(zone,pct,isSelected){
+  if(zone.isStruct) return '#5a5550';
+  const isCrit=zone.isCrit&&critMode&&pct<100;
+  if(isCrit) return C.red;
+  if(pct>=95) return C.green;
+  if(pct>=30) return C.oxford;
+  return '#5a5550';
+}
+
+function renderFloorPlan(){
+  const SVG_W=900,SVG_H=270;
+  let rects='',labels='';
+  FLOOR_ZONES.forEach(z=>{
+    const pct=zonePct(z);
+    const isSel=selZone===z.id;
+    const fill=zoneFill(z,pct,isSel);
+    const stroke=zoneStroke(z,pct,isSel);
+    const strokeW=isSel?2.5:z.isCrit&&critMode&&pct<100?1.5:1;
+    const cx=z.x+z.w/2, cy=z.y+z.h/2;
+    const tc=zoneTextColor(z,pct,isSel);
+    const showPct=!z.isStruct&&pct>=0;
+    rects+=`<rect class="fp-zone${isSel?' selected':''}" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}"
+      fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}" rx="1"
+      data-id="${z.id}" onclick="selectZone('${z.id}')" onmouseenter="showTipZone(event,'${z.id}')" onmouseleave="hideTip()"/>`;
+    // label
+    const linesAvail=z.h/14;
+    if(linesAvail>=2){
+      labels+=`<text class="fp-label" x="${cx}" y="${cy-(showPct?8:3)}" fill="${tc}">${z.label}</text>`;
+      if(z.sub&&linesAvail>=2.5)
+        labels+=`<text class="fp-sublabel" x="${cx}" y="${cy+(showPct?1:9)}" fill="${tc}">${z.sub}</text>`;
+      if(showPct)
+        labels+=`<text class="fp-pct-label" x="${cx}" y="${cy+13}" fill="${stroke}" font-weight="700">${pct}%</text>`;
+    } else {
+      labels+=`<text class="fp-label" x="${cx}" y="${cy}" fill="${tc}" font-size="8">${z.label}</text>`;
+    }
+    // critical path indicator
+    if(z.isCrit&&critMode&&pct<100){
+      labels+=`<rect x="${z.x+1}" y="${z.y+1}" width="6" height="6" fill="${C.red}" rx="1" pointer-events="none"/>`;
+    }
+  });
+  // Today progress marker — draw a vertical dashed line where "today" falls relative to project
+  // Not applicable for floor plan, but show a "snapshot" label
+  const fpHTML=`<svg id="floor-svg" viewBox="0 0 ${SVG_W} ${SVG_H}" xmlns="http://www.w3.org/2000/svg"
+    style="width:100%;min-width:700px;max-width:1100px;border:1px solid var(--border);background:var(--white)">
+    <defs>
+      <pattern id="hatch-crit" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="${C.red}" stroke-width="0.5" stroke-opacity="0.3"/>
+      </pattern>
+    </defs>
+    ${rects}${labels}
+    <!-- North arrow / scale -->
+    <text x="870" y="258" font-family="Arial" font-size="8" fill="#7F8183" text-anchor="middle">← 800 Jubilee, 4th Floor →</text>
+  </svg>`;
+  document.getElementById('floor-wrap').innerHTML=fpHTML;
+}
+renderFloorPlan();
+
+// ═══════════════════════════════════════════════
+// GANTT CHART
+// ═══════════════════════════════════════════════
+const PX_PER_DAY=5.5;
+const GANTT_START=new Date('2025-10-01');
+const GANTT_END=new Date('2026-07-31');
+const GANTT_TOTAL=Math.ceil((GANTT_END-GANTT_START)/86400000);
+
+function renderGantt(){
+  const vt=visibleTasks();
+  // Build month headers
+  const months=[];
+  let cur=new Date(GANTT_START);
+  while(cur<GANTT_END){
+    const mEnd=new Date(cur.getFullYear(),cur.getMonth()+1,1);
+    const days=Math.min(Math.ceil((mEnd-cur)/86400000),GANTT_TOTAL);
+    months.push({label:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][cur.getMonth()]+' '+cur.getFullYear().toString().slice(2),days,d:new Date(cur)});
+    cur=mEnd;
+  }
+  const chartW=GANTT_TOTAL*PX_PER_DAY;
+  const todayLeft=Math.ceil((new Date('2026-03-27')-GANTT_START)/86400000)*PX_PER_DAY;
+  // Month header HTML
+  let mhdr='';
+  let x=0;
+  months.forEach(m=>{
+    const w=m.days*PX_PER_DAY;
+    mhdr+=`<div class="g-month" style="width:${w}px;min-width:${w}px">${m.label}</div>`;
+    x+=w;
+  });
+  // Labels column
+  let labelsHtml='<div style="height:36px;background:var(--oxford);border-bottom:2px solid var(--gold);display:flex;align-items:center;padding:0 8px;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">Task / Work Package</div>';
+  let chartRows='';
+  // Grid lines
+  let gridLines='';
+  let gx=0;
+  months.forEach(m=>{gridLines+=`<div class="grid-line" style="left:${gx}px"></div>`;gx+=m.days*PX_PER_DAY;});
+  gridLines+=`<div class="today-line" style="left:${todayLeft}px"></div>`;
+  gridLines+=`<div class="today-label" style="left:${todayLeft+3}px">TODAY</div>`;
+  vt.forEach(t=>{
+    const isCrit=CRIT_IDS.has(t.id);
+    const ct=computed[t.id]||t;
+    const col=taskBarColor(t);
+    const isSel=selTask===t.id;
+    const isDone=t.pct>=100;
+    const today=new Date('2026-03-27');
+    const isOvd=t.e&&new Date(t.e)<today&&t.pct<100;
+    // Label row
+    labelsHtml+=`<div class="grow" onclick="selectTask('${t.id}')">
+      <div class="gl-cell${isCrit&&critMode?' crit':''}${t.isSummary?' sum':''}${isSel?' sel':''}"
+        style="padding-left:${4+(t.depth||0)*8}px">
+        <div class="gl-status" style="background:${col}"></div>
+        <div class="gl-info">
+          <div class="gl-prefix">${t.px}</div>
+          <div class="gl-name${isCrit&&critMode?' crit':''}${t.isSummary?' sum':''}">${t.n}</div>
+        </div>
+        <div class="gl-dur" style="color:${isCrit&&critMode?C.red:C.gold}">${t.dur}d</div>
+      </div>
+    </div>`;
+    // Bar row
+    const taskStart=ct.nsd!==null?ct.nsd:d2n(t.s);
+    const taskEnd=ct.ned!==null?ct.ned:d2n(t.e);
+    const barLeft=taskStart*PX_PER_DAY;
+    const barW=Math.max(4,(taskEnd-taskStart)*PX_PER_DAY);
+    const barColor=taskBarColor(t);
+    const showInline=barW>60;
+    const durLabel=`${t.dur}d · ${fmtD(n2d(taskStart))} → ${fmtD(n2d(taskEnd))}`;
+    chartRows+=`<div class="grow${t.isSummary?' gc-cell sum':''}" style="cursor:pointer" onclick="selectTask('${t.id}')">
+      <div class="gc-cell" style="width:${chartW}px">
+        <div class="gbar" style="left:${barLeft}px;width:${barW}px">
+          <div class="gbar-track" style="background:${barColor}"></div>
+          <div class="gbar-fill" style="width:${t.pct}%;background:${barColor}"></div>
+          ${showInline&&isDone?`<div class="gbar-inline-label" style="color:${barColor==='#1a7a45'?'#fff':'#0D2748'}">${t.n.substring(0,30)}</div>`:''}
+        </div>
+        ${!showInline?`<div style="position:absolute;left:${barLeft+barW+4}px;top:50%;transform:translateY(-50%);font-size:8px;color:var(--txt3);font-family:Arial,monospace;font-weight:700;white-space:nowrap">${t.dur}d</div>`:''}
+        ${showInline?`<div class="gbar-label">${t.dur}d</div>`:''}
+      </div>
+    </div>`;
+  });
+  document.getElementById('gantt-labels').innerHTML=labelsHtml;
+  document.getElementById('gantt-chart').style.width=chartW+'px';
+  document.getElementById('gantt-chart').innerHTML=
+    `<div class="gantt-hdr-row">${mhdr}</div>${gridLines}${chartRows}`;
+}
+
+// ═══════════════════════════════════════════════
+// SELECTION + DETAIL
+// ═══════════════════════════════════════════════
+function selectTask(id){
+  selTask=id;selZone=null;
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  renderTaskList();renderFloorPlan();
+  // Find which zone this task belongs to
+  const zones=FLOOR_ZONES.filter(z=>z.taskIds&&z.taskIds.includes(id));
+  if(zones.length)selZone=zones[0].id;
+  showTaskDetail(t);
+  // Populate scenario
+  document.getElementById('sc-sel').value=id;
+  onTaskSel();
+}
+
+function selectZone(zid){
+  selZone=zid;selTask=null;
+  const zone=FLOOR_ZONES.find(z=>z.id===zid);
+  if(!zone)return;
+  renderFloorPlan();
+  showZoneDetail(zone);
+}
+
+function showTaskDetail(t){
+  switchRTab('detail');
+  const col=taskBarColor(t);
+  const isCrit=CRIT_IDS.has(t.id);
+  const ct=computed[t.id]||t;
+  const today=new Date('2026-03-27');
+  const isOvd=t.e&&new Date(t.e)<today&&t.pct<100;
+  const deps=DEPS[t.id]||[];
+  document.getElementById('rp-detail').innerHTML=`
+    <div class="rp-zone-name" style="border-color:${col}">${t.n}</div>
+    <div class="rp-zone-sub">${t.px} · ${t.isSummary?'Summary Task':'Work Package'} · Depth ${t.depth}</div>
+    <div class="rp-pct" style="color:${col}">${t.pct}%</div>
+    <div class="rp-track"><div class="rp-fill" style="width:${t.pct}%;background:${col}"></div></div>
+    <div class="sec-title">Schedule Details</div>
+    <div style="font-size:10px">
+      <div class="imp-row"><span class="imp-k">Baseline Start</span><span class="imp-v">${fmtD(t.s)}</span></div>
+      <div class="imp-row"><span class="imp-k">Baseline End</span><span class="imp-v">${fmtD(t.e)}</span></div>
+      <div class="imp-row"><span class="imp-k">CPM Start</span><span class="imp-v">${fmtD(n2d(ct.nsd))}</span></div>
+      <div class="imp-row"><span class="imp-k">CPM End</span><span class="imp-v">${fmtD(n2d(ct.ned))}</span></div>
+      <div class="imp-row"><span class="imp-k">Duration</span><span class="imp-v" style="color:var(--gold)">${t.dur} days</span></div>
+      <div class="imp-row"><span class="imp-k">Status</span><span class="imp-v" style="color:${col}">${t.status}</span></div>
+      <div class="imp-row"><span class="imp-k">Critical Path</span><span class="imp-v" style="color:${isCrit?C.red:C.green}">${isCrit?'YES — CRITICAL':'No float risk'}</span></div>
+      ${isOvd?`<div class="imp-row"><span class="imp-k">⚠ Overdue</span><span class="imp-v" style="color:${C.orange}">Past due date</span></div>`:''}
+      <div class="imp-row"><span class="imp-k">Owners</span><span class="imp-v">${t.ow.length?t.ow.join(', '):'Unassigned'}</span></div>
+    </div>
+    ${deps.length?`<div class="sec-title">Dependencies (${deps.length})</div>
+    <div style="font-size:10px">${deps.map(d=>{const p=tasks.find(x=>x.id===d.pred);return`<div class="imp-row"><span class="imp-k">${d.type}${d.lag?` +${d.lag}d`:''}</span><span class="imp-v">${p?p.px:'?'} ${p?p.n.substring(0,22):'?'}</span></div>`;}).join('')}</div>`:''}
+    <div class="sec-title">Scenario</div>
+    <div style="font-size:10px;color:var(--txt3)">Use <b style="color:var(--oxford)">Scenario Calc</b> tab to adjust this task's duration and see the cascading effect on all ${deps.length} dependencies and the project end date.</div>
+    <button class="sc-btn sc-apply" style="margin-top:8px" onclick="switchRTab('scenario');document.getElementById('sc-sel').value='${t.id}';onTaskSel()">Open in Scenario Calculator →</button>
+  `;
+}
+
+function showZoneDetail(zone){
+  switchRTab('detail');
+  const pct=zonePct(zone);
+  const col=pct>=95?C.green:pct>=60?C.ocean:pct>=30?C.gold:pct>0?C.ublue:C.gray;
+  const isCrit=zone.isCrit&&critMode;
+  const zoneTasks=zone.taskIds.map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
+  document.getElementById('rp-detail').innerHTML=`
+    <div class="rp-zone-name" style="border-color:${isCrit?C.red:col}">${zone.label}</div>
+    <div class="rp-zone-sub">${zone.sub}${zone.isCrit&&critMode?` · ⚡ CRITICAL PATH`:''}</div>
+    ${!zone.isStruct?`<div class="rp-pct" style="color:${isCrit&&pct<100?C.red:col}">${pct>=0?pct+'%':'N/A'}</div>
+    <div class="rp-track"><div class="rp-fill" style="width:${Math.max(0,pct)}%;background:${isCrit&&pct<100?C.red:col}"></div></div>`:''}
+    <div class="sec-title">Linked Tasks (${zoneTasks.length})</div>
+    ${zoneTasks.map(t=>{
+      const tc=taskBarColor(t);
+      const ic=CRIT_IDS.has(t.id);
+      return`<div class="task-pill${ic&&critMode?' crit-p':''}" onclick="selectTask('${t.id}')">
+        <div style="width:6px;height:6px;border-radius:50%;background:${tc};flex-shrink:0"></div>
+        <span class="tp-prefix">${t.px}</span>
+        <span class="tp-name">${t.n}</span>
+        <span class="tp-pct" style="color:${tc}">${t.pct}%</span>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ═══════════════════════════════════════════════
+// SCENARIO CALCULATOR
+// ═══════════════════════════════════════════════
+function populateScenarioSelect(){
+  const sel=document.getElementById('sc-sel');
+  sel.innerHTML='<option value="">— choose a task —</option>'+
+    tasks.filter(t=>t.pct<100).map(t=>`<option value="${t.id}"${CRIT_IDS.has(t.id)?' style="color:var(--red)"':''}>[${t.px}]${CRIT_IDS.has(t.id)?'⚡':''} ${t.n}</option>`).join('');
+}
+populateScenarioSelect();
+
+function onTaskSel(){
+  const id=document.getElementById('sc-sel').value;
+  const f=document.getElementById('sc-form');
+  if(!id){f.style.display='none';return;}
+  f.style.display='block';
+  const t=tasks.find(x=>x.id===id);
+  document.getElementById('sc-cur').value=t.dur;
+  document.getElementById('sc-new').value=t.dur;
+  document.getElementById('sc-pct').value='';
+  document.getElementById('impact').classList.remove('show');
+  document.getElementById('sc-name').value=`${t.px}: adjust to ${t.dur}d`;
+}
+
+function previewImpact(){
+  const id=document.getElementById('sc-sel').value;if(!id)return;
+  const t=tasks.find(x=>x.id===id);
+  const nd=parseInt(document.getElementById('sc-new').value)||t.dur;
+  const delta=nd-t.dur;
+  document.getElementById('sc-pct').value=t.dur>0?Math.round(delta/t.dur*100):0;
+  const sim=JSON.parse(JSON.stringify(tasks));sim.find(x=>x.id===id).dur=nd;
+  const simC=runCPM(sim);
+  const newEnd=Math.max(...Object.values(simC).map(x=>x.ned||x.ed));
+  const endDelta=newEnd-BASE_END_DAY;
+  const isCrit=CRIT_IDS.has(id);
+  document.getElementById('impact').classList.add('show');
+  document.getElementById('impact-rows').innerHTML=`
+    <div class="imp-row"><span class="imp-k">Duration change</span><span class="imp-v" style="color:${delta<0?C.green:delta>0?C.red:C.gray}">${delta>0?'+':''}${delta}d</span></div>
+    <div class="imp-row"><span class="imp-k">On critical path</span><span class="imp-v" style="color:${isCrit?C.red:C.green}">${isCrit?'YES — shifts end':'NO — float absorbs'}</span></div>
+    <div class="imp-row"><span class="imp-k">Baseline end</span><span class="imp-v">${fmtD('2026-07-14')}</span></div>
+    <div class="imp-row"><span class="imp-k">Scenario end</span><span class="imp-v" style="color:${endDelta<0?C.green:endDelta>0?C.red:C.gray}">${fmtD(n2d(newEnd))}</span></div>
+    <div class="imp-row"><span class="imp-k">${endDelta<0?'Days saved':'Days added'}</span><span class="imp-v" style="color:${endDelta<0?C.green:C.red};font-size:14px">${Math.abs(endDelta)}d</span></div>
+  `;
+}
+function fromPct(){
+  const id=document.getElementById('sc-sel').value;if(!id)return;
+  const t=tasks.find(x=>x.id===id);
+  const pct=parseInt(document.getElementById('sc-pct').value)||0;
+  document.getElementById('sc-new').value=Math.max(1,Math.round(t.dur*(1+pct/100)));
+  previewImpact();
+}
+
+function applyScenario(){
+  const id=document.getElementById('sc-sel').value;if(!id)return;
+  const nd=parseInt(document.getElementById('sc-new').value);
+  const t=tasks.find(x=>x.id===id);
+  t.dur=nd;
+  computed=runCPM(tasks);
+  const newEnd=Math.max(...Object.values(computed).map(x=>x.ned||x.ed));
+  const endDelta=newEnd-BASE_END_DAY;
+  scenarioActive=true;
+  document.getElementById('b-sc').style.display='';
+  document.getElementById('btn-reset').style.display='';
+  // Show banner
+  const rb=document.getElementById('rbanner');rb.classList.add('show');
+  rb.style.borderBottomColor=endDelta<0?C.ocean:C.orange;
+  document.getElementById('rb-new').textContent=fmtD(n2d(newEnd));
+  document.getElementById('rb-new').style.color=endDelta<0?'#56BDA2':'#F48E27';
+  document.getElementById('rb-delta').textContent=(endDelta>0?'+':'')+endDelta+'d';
+  document.getElementById('rb-delta').style.color=endDelta<0?'#56BDA2':'#F48E27';
+  document.getElementById('rb-note').textContent=endDelta<0?`${Math.abs(endDelta)} days saved by compressing "${t.n}"`:endDelta>0?`${endDelta} days added — end slips to ${fmtD(n2d(newEnd))}`:'No change to end date';
+  updateKPIs();renderTaskList();renderFloorPlan();
+  if(currentView==='gantt')renderGantt();
+}
+
+function saveScenario(){
+  const id=document.getElementById('sc-sel').value;if(!id)return;
+  const name=document.getElementById('sc-name').value||`Scenario ${savedScenarios.length+1}`;
+  const nd=parseInt(document.getElementById('sc-new').value);
+  const t=tasks.find(x=>x.id===id);
+  const simTasks=JSON.parse(JSON.stringify(tasks));simTasks.find(x=>x.id===id).dur=nd;
+  const simC=runCPM(simTasks);
+  const newEnd=Math.max(...Object.values(simC).map(x=>x.ned||x.ed));
+  const endDelta=newEnd-BASE_END_DAY;
+  savedScenarios.push({name,tid:id,tname:t.n,nd,oldDur:t.dur,endDelta,newEnd:n2d(newEnd),snap:JSON.parse(JSON.stringify(tasks))});
+  document.getElementById('b-saved').style.display='';
+  renderSaved();switchRTab('saved');
+}
+
+function renderSaved(){
+  const c=document.getElementById('saved-list');
+  if(!savedScenarios.length){c.innerHTML='<div class="empty-sc">No scenarios saved yet.</div>';return;}
+  c.innerHTML=savedScenarios.map((sc,i)=>`
+    <div class="sc-saved-item" onclick="loadSaved(${i})">
+      <div class="sc-saved-name">${sc.name}</div>
+      <div class="sc-saved-meta">${sc.tname.substring(0,40)} · ${sc.oldDur}d → ${sc.nd}d</div>
+      <div class="sc-saved-delta" style="color:${sc.endDelta<0?C.ocean:sc.endDelta>0?C.orange:C.gray}">${sc.endDelta>0?'+':''}${sc.endDelta}d · End: ${fmtD(sc.newEnd)}</div>
+    </div>`).join('');
+}
+
+function loadSaved(i){
+  const sc=savedScenarios[i];
+  tasks=JSON.parse(JSON.stringify(sc.snap));computed=runCPM(tasks);
+  document.getElementById('b-sc').style.display='';document.getElementById('btn-reset').style.display='';
+  updateKPIs();renderTaskList();renderFloorPlan();if(currentView==='gantt')renderGantt();
+}
+
+function resetBaseline(){
+  tasks=JSON.parse(JSON.stringify(BASE_TASKS));computed=runCPM(tasks);
+  scenarioActive=false;
+  document.getElementById('b-sc').style.display='none';document.getElementById('btn-reset').style.display='none';
+  document.getElementById('rbanner').classList.remove('show');
+  updateKPIs();renderTaskList();renderFloorPlan();if(currentView==='gantt')renderGantt();
+  populateScenarioSelect();
+}
+
+// ═══════════════════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════════════════
+function switchView(v){
+  currentView=v;
+  document.getElementById('view-floor').classList.toggle('active',v==='floor');
+  document.getElementById('view-gantt').classList.toggle('active',v==='gantt');
+  document.getElementById('tab-floor').classList.toggle('on',v==='floor');
+  document.getElementById('tab-gantt').classList.toggle('on',v==='gantt');
+  if(v==='gantt'){renderGantt();setTimeout(scrollToToday,100);}
+}
+function switchRTab(t){
+  rTab=t;
+  ['detail','scenario','saved'].forEach(n=>{
+    document.getElementById('rp-'+n).style.display=n===t?'':'none';
+    document.getElementById('rt-'+n).classList.toggle('on',n===t);
+  });
+}
+function toggleCritical(){
+  critMode=!critMode;
+  document.getElementById('btn-crit').classList.toggle('on',critMode);
+  renderTaskList();renderFloorPlan();if(currentView==='gantt')renderGantt();
+}
+function scrollToToday(){
+  const wrap=document.getElementById('gantt-chart-wrap');
+  if(!wrap)return;
+  const todayPx=Math.ceil((new Date('2026-03-27')-GANTT_START)/86400000)*PX_PER_DAY;
+  wrap.scrollLeft=Math.max(0,todayPx-wrap.clientWidth/2);
+}
+
+// ═══════════════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════════════
+const tip=document.getElementById('tooltip');
+function showTip(e,id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  const col=taskBarColor(t);
+  const isCrit=CRIT_IDS.has(t.id);
+  tip.innerHTML=`<div class="tt-name">${t.n}</div>
+    <div class="tt-row"><span class="tt-k">Prefix</span><span class="tt-v">${t.px}</span></div>
+    <div class="tt-row"><span class="tt-k">Duration</span><span class="tt-v" style="color:${C.gold}">${t.dur}d</span></div>
+    <div class="tt-row"><span class="tt-k">Progress</span><span class="tt-v" style="color:${col}">${t.pct}%</span></div>
+    <div class="tt-row"><span class="tt-k">Start → End</span><span class="tt-v">${fmtD(t.s)} → ${fmtD(t.e)}</span></div>
+    ${isCrit?`<div style="color:${C.red};font-weight:700;font-size:9px;margin-top:4px;text-transform:uppercase;letter-spacing:.06em">⚡ On Critical Path</div>`:''}`;
+  tip.style.display='block';moveTip(e);
+}
+function showTipZone(e,zid){
+  const z=FLOOR_ZONES.find(x=>x.id===zid);if(!z)return;
+  const pct=zonePct(z);
+  tip.innerHTML=`<div class="tt-name">${z.label}</div>
+    <div class="tt-row"><span class="tt-k">Area</span><span class="tt-v">${z.sub}</span></div>
+    ${pct>=0?`<div class="tt-row"><span class="tt-k">Progress</span><span class="tt-v" style="color:${C.gold}">${pct}%</span></div>`:''}
+    <div class="tt-row"><span class="tt-k">Linked tasks</span><span class="tt-v">${z.taskIds.length}</span></div>
+    ${z.isCrit&&critMode?`<div style="color:${C.red};font-weight:700;font-size:9px;margin-top:4px">⚡ CRITICAL PATH</div>`:''}`;
+  tip.style.display='block';moveTip(e);
+}
+function moveTip(e){
+  let x=e.clientX+14,y=e.clientY-14;
+  if(x+250>window.innerWidth)x=e.clientX-260;
+  if(y+160>window.innerHeight)y=e.clientY-160;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+}
+function hideTip(){tip.style.display='none';}
+document.addEventListener('mousemove',e=>{if(tip.style.display==='block')moveTip(e);});
+
+// Sync labels scroll with chart wrap
+document.addEventListener('DOMContentLoaded',()=>{
+  const wrap=document.getElementById('gantt-chart-wrap');
+  const labels=document.getElementById('gantt-labels');
+  if(wrap&&labels){
+    wrap.addEventListener('scroll',()=>{labels.scrollTop=wrap.scrollTop;});
+  }
+});
+// Also sync on dynamic render
+function syncGanttScroll(){
+  const wrap=document.getElementById('gantt-chart-wrap');
+  const labels=document.getElementById('gantt-labels');
+  if(wrap&&labels)wrap.addEventListener('scroll',()=>{labels.scrollTop=wrap.scrollTop;});
+}
+setTimeout(syncGanttScroll,200);
+</script>
+</body>
+</html>
