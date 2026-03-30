@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ICPL · Project Command Centre v3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --ink:#0d1117;--ink2:#1c2333;--ink3:#2d3748;
+  --sf:#f7f6f2;--sf2:#eceae4;--sf3:#e0ddd5;
+  --w:#fff;
+  --gold:#c9a84c;--gold-l:#f5e9b8;--gold-d:#8b6b1f;
+  --teal:#1a7f6e;--teal-l:#d1ece8;
+  --red:#c0392b;--red-l:#fde8e6;
+  --amb:#d97706;--amb-l:#fef3cd;
+  --blue:#1e5fa8;--blue-l:#dbeafe;
+  --green:#1a6b3c;--green-l:#d1fae5;
+  --purple:#5b21b6;--purple-l:#ede9fe;
+  --bd:rgba(13,17,23,.1);--bd2:rgba(13,17,23,.06);
+  --fn:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --r:10px;--rl:16px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.04);
+  --shm:0 4px 12px rgba(0,0,0,.1),0 12px 32px rgba(0,0,0,.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fn);background:var(--sf);color:var(--ink);font-size:14px;line-height:1.5;min-height:100vh}
+
+/* HEADER */
+.hdr{background:var(--ink);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:54px;border-bottom:2.5px solid var(--gold);position:sticky;top:0;z-index:200}
+.hdr-brand{display:flex;align-items:center;gap:14px}
+.hdr-logo{width:34px;height:34px;background:var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--ink);font-family:var(--mono);letter-spacing:-.5px}
+.hdr-title{font-size:14px;font-weight:600;color:#fff;letter-spacing:-.2px}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+.hdr-r{display:flex;align-items:center;gap:14px}
+.hdr-date{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.45)}
+.dot-live{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+/* FILTER BAR */
+.fbar{background:var(--w);border-bottom:1px solid var(--bd);padding:9px 28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:54px;z-index:100}
+.fg{display:flex;align-items:center;gap:6px}
+.flbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:rgba(13,17,23,.4);white-space:nowrap}
+.fbar select{font-family:var(--fn);font-size:12px;color:var(--ink);background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:5px 26px 5px 9px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%230d1117' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;min-width:130px;transition:border-color .15s}
+.fbar select:focus{outline:none;border-color:var(--gold)}
+.fdiv{width:1px;height:22px;background:var(--bd)}
+.fbar-reset{margin-left:auto;font-family:var(--fn);font-size:11px;font-weight:500;color:var(--gold-d);background:var(--gold-l);border:1px solid rgba(201,168,76,.3);border-radius:6px;padding:5px 11px;cursor:pointer;transition:all .15s}
+.fbar-reset:hover{background:var(--gold);color:var(--ink)}
+
+/* NAV TABS */
+.nav-tabs{background:var(--w);border-bottom:1px solid var(--bd);padding:0 28px;display:flex;gap:0}
+.nav-tab{font-family:var(--fn);font-size:12px;font-weight:500;padding:10px 16px;border:none;border-bottom:2px solid transparent;background:transparent;cursor:pointer;color:rgba(13,17,23,.5);transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.nav-tab.active{border-bottom-color:var(--gold);color:var(--ink)}
+.nav-tab .nbadge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:8px;background:var(--red);color:#fff}
+.nav-tab .nbadge.amb{background:var(--amb)}
+.nav-tab .nbadge.blue{background:var(--blue)}
+
+/* MAIN */
+.main{padding:18px 28px 48px;display:flex;flex-direction:column;gap:14px}
+
+/* KPI strip */
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.kpi{background:var(--w);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.kpi:hover{transform:translateY(-1px);box-shadow:var(--shm)}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--acc,var(--bd))}
+.kpi.red{--acc:var(--red)}.kpi.amb{--acc:var(--amb)}.kpi.teal{--acc:var(--teal)}.kpi.blue{--acc:var(--blue)}.kpi.green{--acc:var(--green)}.kpi.gold{--acc:var(--gold)}
+.kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:rgba(13,17,23,.4);margin-bottom:4px}
+.kpi-val{font-size:26px;font-weight:300;color:var(--ink);line-height:1;font-family:var(--mono);letter-spacing:-1px}
+.kpi-sub{font-size:10px;color:rgba(13,17,23,.38);margin-top:4px}
+
+/* Cards */
+.card{background:var(--w);border:1px solid var(--bd);border-radius:var(--rl);padding:16px 18px;overflow:hidden}
+.card-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.2px}
+.card-sub{font-size:11px;color:rgba(13,17,23,.4);margin-top:2px}
+.card-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;background:var(--sf);color:rgba(13,17,23,.5);white-space:nowrap;flex-shrink:0}
+
+/* Grid layouts */
+.g3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
+.g2{display:grid;grid-template-columns:3fr 2fr;gap:14px}
+.g2b{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+
+/* S-curve selector */
+.scurve-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.scurve-controls select{font-family:var(--fn);font-size:12px;color:var(--ink);background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:4px 24px 4px 8px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%230d1117' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
+.scurve-controls select:focus{outline:none;border-color:var(--gold)}
+.legend-row{display:flex;gap:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(13,17,23,.6)}
+.legend-dot{width:10px;height:3px;border-radius:2px}
+
+/* EVM */
+.evm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.evm-card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px 12px}
+.evm-lbl{font-size:10px;color:rgba(13,17,23,.45);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.evm-val{font-size:18px;font-weight:500;font-family:var(--mono);letter-spacing:-.5px}
+.evm-val.red{color:var(--red)}.evm-val.green{color:var(--green)}.evm-val.amb{color:var(--amb)}.evm-val.blue{color:var(--blue)}
+.evm-sub{font-size:10px;margin-top:2px}
+.evm-sub.neg{color:var(--red)}.evm-sub.pos{color:var(--green)}
+
+/* Task table */
+.tbl-wrap{overflow-x:auto;max-height:420px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{position:sticky;top:0;z-index:2}
+thead th{background:var(--sf);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:rgba(13,17,23,.4);padding:7px 10px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--bd2);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#fafaf8}
+.tnc{max-width:240px}.tnc .tn{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tnc .tp{font-size:10px;color:rgba(13,17,23,.38);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;white-space:nowrap;letter-spacing:.2px}
+.badge.overdue{background:var(--red-l);color:var(--red)}
+.badge.wk{background:var(--amb-l);color:var(--amb)}
+.badge.mo{background:var(--blue-l);color:var(--blue)}
+.badge.later{background:var(--sf2);color:rgba(13,17,23,.5)}
+.badge.delayed{background:var(--red-l);color:var(--red)}
+.badge.ip{background:var(--teal-l);color:var(--teal)}
+.badge.yts{background:var(--amb-l);color:var(--amb)}
+.badge.done{background:var(--green-l);color:var(--green)}
+.badge.fitout{background:#e0f2fe;color:#0369a1}
+.badge.refurb{background:#fef9c3;color:#854d0e}
+.badge.green-f{background:var(--green-l);color:#065f46}
+.badge.int{background:var(--sf2);color:rgba(13,17,23,.5)}
+.badge.crit{background:#fee2e2;color:#991b1b;border:1px solid rgba(153,27,27,.2)}
+
+/* Progress */
+.pbar{display:flex;align-items:center;gap:5px}
+.pbar-track{flex:1;height:4px;border-radius:2px;background:var(--sf2);min-width:36px}
+.pbar-fill{height:4px;border-radius:2px}
+.pbar-val{font-family:var(--mono);font-size:10px;color:rgba(13,17,23,.45);min-width:22px;text-align:right}
+
+/* Slack */
+.slack{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px}
+.slack.zero{color:var(--red)}.slack.low{color:var(--amb)}.slack.ok{color:var(--teal)}
+
+/* Owner chips */
+.owners{display:flex;gap:2px;flex-wrap:wrap}
+.oc{display:inline-flex;align-items:center;gap:3px;font-size:10px;background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:1px 5px;white-space:nowrap}
+.av{width:13px;height:13px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* Critical path */
+.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 18px}
+.cp-chain{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px;border-left:3px solid var(--cacc,var(--bd))}
+.cp-chain.critical{--cacc:var(--red)}.cp-chain.high{--cacc:var(--amb)}.cp-chain.medium{--cacc:var(--blue)}
+.cp-ct{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.cp-cm{font-size:10px;color:rgba(13,17,23,.4);margin-bottom:8px}
+.cp-exp{font-size:10px;color:rgba(13,17,23,.5);background:rgba(13,17,23,.03);border-radius:5px;padding:5px 7px;margin-bottom:9px;line-height:1.5}
+.cp-steps{display:flex;flex-direction:column;gap:0}
+.cp-step{display:flex;gap:7px;align-items:flex-start}
+.cp-conn{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.cp-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid;flex-shrink:0;margin-top:2px}
+.cp-dot.done{background:var(--green);border-color:var(--green)}.cp-dot.active{background:var(--teal);border-color:var(--teal)}.cp-dot.late{background:var(--red);border-color:var(--red)}.cp-dot.soon{background:transparent;border-color:rgba(13,17,23,.3)}
+.cp-vl{width:1px;height:9px;background:var(--bd);margin:1px 0}
+.cp-sc{flex:1;padding-bottom:5px}
+.cp-sn{font-size:11px;font-weight:500;color:var(--ink)}
+.cp-sr{display:flex;gap:5px;align-items:center;margin-top:2px;flex-wrap:wrap}
+.cp-slk{font-size:10px;font-weight:600;margin-top:1px}
+.cp-slk.zero{color:var(--red)}.cp-slk.low{color:var(--amb)}.cp-slk.ok{color:var(--teal)}
+
+/* Project cards */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:16px 18px}
+.proj-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px;transition:transform .15s,box-shadow .15s}
+.proj-card:hover{transform:translateY(-2px);box-shadow:var(--shm)}
+.pc-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.pc-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3}
+.pc-meta{font-size:10px;color:rgba(13,17,23,.4);margin-top:2px}
+.pc-prog{margin:8px 0}
+.pc-pct{display:flex;justify-content:space-between;font-size:10px;color:rgba(13,17,23,.45);margin-bottom:4px}
+.pc-bar{height:5px;border-radius:3px;background:var(--sf2)}
+.pc-fill{height:5px;border-radius:3px}
+.pc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)}
+.pc-sl{font-size:9px;color:rgba(13,17,23,.38);text-transform:uppercase;letter-spacing:.4px}
+.pc-sv{font-size:13px;font-weight:600;font-family:var(--mono);margin-top:1px}
+.pc-sv.risk{color:var(--red)}
+.pc-foot{margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;font-size:10px;color:rgba(13,17,23,.35)}
+
+/* Empty */
+.empty{padding:36px;text-align:center;color:rgba(13,17,23,.3);font-size:12px}
+
+/* footer */
+.footer{background:var(--w);border-top:1px solid var(--bd);padding:7px 28px;display:flex;justify-content:space-between;font-size:10px;color:rgba(13,17,23,.3)}
+.footer strong{color:rgba(13,17,23,.5)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:2px}
+
+/* Responsive */
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.g3{grid-template-columns:1fr 1fr}.g3 .card:first-child{grid-column:1/-1}.g2{grid-template-columns:1fr}}
+@media(max-width:700px){.main{padding:10px 12px 32px}.hdr,.fbar{padding:0 14px}.kpis{grid-template-columns:repeat(2,1fr)}.g3,.g2,.g2b,.g4{grid-template-columns:1fr}.cp-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">ICP</div>
+    <div>
+      <div class="hdr-title">Project Command Centre</div>
+      <div class="hdr-sub">Indian City Properties Limited · Pan-India Portfolio</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="dot-live"></div>
+    <div class="hdr-date" id="hDate"></div>
+  </div>
+</header>
+
+<div class="fbar">
+  <div class="fg"><span class="flbl">Project</span>
+    <select id="fProj" onchange="applyFilters()">
+      <option value="all">All Projects</option>
+    </select>
+  </div>
+  <div class="fdiv"></div>
+  <div class="fg"><span class="flbl">Dept</span>
+    <select id="fDept" onchange="applyFilters()">
+      <option value="all">All Departments</option>
+      <option value="Fit-out">Fit-out</option>
+      <option value="Refurb">Refurbishment</option>
+      <option value="Greenfield">Greenfield</option>
+      <option value="Internal">Internal</option>
+    </select>
+  </div>
+  <div class="fdiv"></div>
+  <div class="fg"><span class="flbl">Stakeholder</span>
+    <select id="fSH" onchange="applyFilters()">
+      <option value="all">All Stakeholders</option>
+    </select>
+  </div>
+  <div class="fdiv"></div>
+  <div class="fg"><span class="flbl">Time</span>
+    <select id="fTime" onchange="applyFilters()">
+      <option value="all">All Time</option>
+      <option value="overdue">Overdue</option>
+      <option value="week">This Week</option>
+      <option value="month">Next 30 Days</option>
+      <option value="q">Next 90 Days</option>
+    </select>
+  </div>
+  <div class="fdiv"></div>
+  <div class="fg"><span class="flbl">Status</span>
+    <select id="fStatus" onchange="applyFilters()">
+      <option value="all">All Status</option>
+      <option value="Delayed">Delayed</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Yet to start">Yet to Start</option>
+    </select>
+  </div>
+  <button class="fbar-reset" onclick="resetFilters()">↺ Reset</button>
+</div>
+
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="setPage('overview',this)">Overview</button>
+  <button class="nav-tab" onclick="setPage('scurve',this)">S-Curves <span class="nbadge blue" id="scBadge">10</span></button>
+  <button class="nav-tab" onclick="setPage('productivity',this)">Productivity</button>
+  <button class="nav-tab" onclick="setPage('tasks',this)">Tasks <span class="nbadge" id="tBadge">0</span></button>
+  <button class="nav-tab" onclick="setPage('critical',this)">Critical Path <span class="nbadge amb" id="cpBadge">0</span></button>
+  <button class="nav-tab" onclick="setPage('projects',this)">Projects <span class="nbadge blue" id="prBadge">10</span></button>
+</nav>
+
+<div class="main">
+
+<!-- OVERVIEW PAGE -->
+<div id="page-overview">
+  <div class="kpis" id="kpiStrip"></div>
+  <div class="g3" style="margin-top:0">
+    <div class="card">
+      <div class="card-hdr">
+        <div><div class="card-title">Portfolio S-Curve — Cumulative Progress</div><div class="card-sub">Planned vs actual completion across all active projects</div></div>
+        <span class="card-badge">S-Curve</span>
+      </div>
+      <div style="height:220px"><canvas id="cPortfolioS"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Task status</div><div class="card-sub">Portfolio breakdown</div></div></div>
+      <div style="height:160px"><canvas id="cDonut"></canvas></div>
+      <div id="donutLeg" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">By department</div><div class="card-sub">Open tasks per group</div></div></div>
+      <div style="height:160px"><canvas id="cDept"></canvas></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Summary task progress</div><div class="card-sub">Top-level work packages — planned vs achieved</div></div><span class="card-badge">Bar</span></div>
+      <div id="sumBarWrap" style="overflow-y:auto"><canvas id="cSumBar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Stakeholder workload</div><div class="card-sub">Open vs delayed tasks per person</div></div></div>
+      <div style="height:280px"><canvas id="cSH"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- S-CURVE PAGE -->
+<div id="page-scurve" style="display:none">
+  <div class="card">
+    <div class="card-hdr">
+      <div>
+        <div class="card-title">Project S-Curve — Individual Project Progress</div>
+        <div class="card-sub">Select a project to view planned vs actual task completion over time</div>
+      </div>
+      <div class="scurve-controls">
+        <select id="scProj" onchange="renderSCurve()">
+          <option value="portfolio">Portfolio (All)</option>
+        </select>
+        <select id="scMode" onchange="renderSCurve()">
+          <option value="count">By task count</option>
+          <option value="pct">By % completion</option>
+        </select>
+      </div>
+    </div>
+    <div class="legend-row" id="scLegend" style="margin-bottom:12px"></div>
+    <div style="height:320px"><canvas id="cSCurveMain"></canvas></div>
+    <div id="scInsight" style="margin-top:12px;font-size:11px;color:rgba(13,17,23,.5);background:var(--sf);border-radius:6px;padding:9px 12px;line-height:1.6"></div>
+  </div>
+  <div class="g2b" style="margin-top:0">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Schedule Performance Index (SPI)</div><div class="card-sub">Actual / Planned progress ratio per project</div></div><span class="card-badge">SPI</span></div>
+      <div style="height:240px"><canvas id="cSPI"></canvas></div>
+      <div style="font-size:10px;color:rgba(13,17,23,.4);margin-top:6px">SPI = 1.0 is on schedule · &gt;1.0 ahead · &lt;1.0 behind</div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Planned vs actual by project</div><div class="card-sub">Comparison of planned end date vs current forecast</div></div><span class="card-badge">Variance</span></div>
+      <div style="height:240px"><canvas id="cVariance"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTIVITY PAGE -->
+<div id="page-productivity" style="display:none">
+  <div class="g4">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Task closure rate</div><div class="card-sub">Closed tasks per month</div></div></div>
+      <div style="height:180px"><canvas id="cClosureRate"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Issue density</div><div class="card-sub">Open issues per project</div></div></div>
+      <div style="height:180px"><canvas id="cIssues"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Completion ratio</div><div class="card-sub">Closed ÷ total tasks per project</div></div></div>
+      <div style="height:180px"><canvas id="cCompRatio"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Delay profile</div><div class="card-sub">Delayed tasks vs on-track per project</div></div></div>
+      <div style="height:180px"><canvas id="cDelayProfile"></canvas></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Earned Value Management (EVM) — Portfolio</div><div class="card-sub">PV · EV · AC indices across active projects</div></div><span class="card-badge">EVM</span></div>
+      <div class="evm-grid" id="evmStrip"></div>
+      <div style="height:200px"><canvas id="cEVM"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Time elapsed vs progress</div><div class="card-sub">% time consumed vs % tasks complete</div></div><span class="card-badge">Efficiency</span></div>
+      <div style="height:260px"><canvas id="cEfficiency"></canvas></div>
+      <div style="font-size:10px;color:rgba(13,17,23,.4);margin-top:6px">Points above the diagonal = behind schedule · Below = ahead of schedule</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div class="card-hdr"><div><div class="card-title">Monthly task activity — completed vs opened</div><div class="card-sub">Portfolio-wide task velocity over the last 6 months</div></div><span class="card-badge">Velocity</span></div>
+    <div style="height:180px"><canvas id="cVelocity"></canvas></div>
+  </div>
+</div>
+
+<!-- TASKS PAGE -->
+<div id="page-tasks" style="display:none">
+  <div class="card" style="padding:0">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="font-size:13px;font-weight:600">Task Register</div>
+      <input type="text" id="searchInput" placeholder="Search tasks, projects…" oninput="applyFilters()" style="font-family:var(--fn);font-size:12px;padding:5px 9px 5px 26px;border:1px solid var(--bd);border-radius:6px;background:var(--sf) url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Ccircle cx='5' cy='5' r='3.5' stroke='%230d1117' stroke-opacity='.3' stroke-width='1.5' fill='none'/%3E%3Cline x1='8' y1='8' x2='11' y2='11' stroke='%230d1117' stroke-opacity='.3' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E\") no-repeat 7px center;width:220px;color:var(--ink)">
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:24px"></th>
+          <th>Task</th><th>Project</th><th>Dept</th><th>Owners</th>
+          <th>Due</th><th>Timing</th><th>Status</th><th>Progress</th><th>Slack</th>
+        </tr></thead>
+        <tbody id="taskBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- CRITICAL PATH PAGE -->
+<div id="page-critical" style="display:none">
+  <div class="card" style="padding:0">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--bd2)"><div class="card-title">Critical Path Analysis</div><div class="card-sub" style="margin-top:2px">Zero-float task chains — any delay here slips the project end date</div></div>
+    <div class="cp-grid" id="cpGrid"></div>
+  </div>
+</div>
+
+<!-- PROJECTS PAGE -->
+<div id="page-projects" style="display:none">
+  <div class="card" style="padding:0">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--bd2)"><div class="card-title">Project Portfolio</div><div class="card-sub" style="margin-top:2px">All active projects — progress, health, and key metrics</div></div>
+    <div class="proj-grid" id="projGrid"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">
+  <span>ICP · Indian City Properties Limited · Project Command Centre v3</span>
+  <span>Zoho Projects snapshot · <strong>30 Mar 2026</strong></span>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const TODAY=new Date('2026-03-30');
+const WK_END=new Date('2026-04-06');
+const MO_END=new Date('2026-04-30');
+const Q_END=new Date('2026-06-30');
+Chart.defaults.font.family="'DM Sans',sans-serif";
+Chart.defaults.color='rgba(13,17,23,.45)';
+document.getElementById('hDate').textContent=TODAY.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const PROJ=[
+  {id:'p1',name:'Basement Fitouts (Ph-2&3)',short:'Basement Fitouts',dept:'Fit-out',pct:12,owner:'Harshal Rastogi',start:'2026-02-02',end:'2026-05-27',open:49,closed:2,issues:0,budget:100},
+  {id:'p2',name:'Thapar House Janpath Refurb+Fitout',short:'Thapar Janpath',dept:'Refurb',pct:35,owner:'Harshal Rastogi',start:'2025-09-19',end:'2026-08-13',open:186,closed:18,issues:9,budget:100},
+  {id:'p3',name:'Thapar Compound — Refurb + MLCP',short:'Thapar Compound',dept:'Refurb',pct:31,owner:'Sourav Kar',start:'2025-10-06',end:'2026-07-29',open:31,closed:9,issues:2,budget:100},
+  {id:'p4',name:'88 Infinity — Commercial Building',short:'88 Infinity',dept:'Greenfield',pct:24,owner:'Amjad Abdul',start:'2024-08-05',end:'2028-01-12',open:106,closed:12,issues:10,budget:100},
+  {id:'p5',name:'Nuvama 4th Floor Fit-outs',short:'Nuvama Fit-outs',dept:'Fit-out',pct:30,owner:'Amjad Abdul',start:'2025-10-24',end:'2026-07-14',open:48,closed:12,issues:1,budget:100},
+  {id:'p6',name:'25 Brabourne — Refurbishment',short:'25 Brabourne',dept:'Refurb',pct:64,owner:'Sourav Kar',start:'2025-05-02',end:'2026-06-26',open:46,closed:37,issues:19,budget:100},
+  {id:'p7',name:'French Bank Building (FBB)',short:'French Bank',dept:'Refurb',pct:8,owner:'Harshal Rastogi',start:'2025-09-15',end:'2027-05-19',open:76,closed:23,issues:1,budget:100},
+  {id:'p8',name:'One Forbes · Mumbai',short:'One Forbes',dept:'Refurb',pct:86,owner:'Harshal Rastogi',start:'2022-06-29',end:'2026-07-04',open:52,closed:91,issues:11,budget:100},
+  {id:'p9',name:'Ballygaunge 360',short:'Ballygaunge 360',dept:'Greenfield',pct:28,owner:'Sourav Kar',start:'2024-06-06',end:'2027-11-16',open:93,closed:19,issues:4,budget:100},
+  {id:'p10',name:'Action Points from CEO',short:'CEO Actions',dept:'Internal',pct:100,owner:'Aviral Jain',start:'2026-01-14',end:'2026-01-15',open:11,closed:5,issues:0,budget:0},
+];
+
+// Per-project S-curve data: monthly checkpoints with planned% and actual%
+// Generated from task start/end dates and completion percentages (Zoho data)
+const SC_DATA={
+  portfolio:{
+    labels:['Oct\'25','Nov\'25','Dec\'25','Jan\'26','Feb\'26','Mar\'26','Apr\'26','May\'26','Jun\'26','Jul\'26','Aug\'26'],
+    planned:[3,8,15,23,33,42,53,65,76,88,95],
+    actual:[2,5,11,18,26,36,null,null,null,null,null]
+  },
+  p1:{
+    labels:['Feb','Mar','Apr','May'],
+    planned:[10,30,60,100],actual:[5,12,null,null]
+  },
+  p2:{
+    labels:['Sep\'25','Oct\'25','Nov\'25','Dec\'25','Jan\'26','Feb\'26','Mar\'26','Apr\'26','May\'26','Jun\'26','Jul\'26','Aug\'26'],
+    planned:[3,8,14,22,32,44,56,66,75,84,92,100],
+    actual:[2,5,10,15,22,30,35,null,null,null,null,null]
+  },
+  p3:{
+    labels:['Oct\'25','Nov\'25','Dec\'25','Jan\'26','Feb\'26','Mar\'26','Apr\'26','May\'26','Jun\'26','Jul\'26'],
+    planned:[5,12,20,30,42,55,68,80,92,100],
+    actual:[4,8,14,20,27,31,null,null,null,null]
+  },
+  p4:{
+    labels:['Aug\'24','Jan\'25','Jun\'25','Oct\'25','Jan\'26','Mar\'26','Jun\'26','Dec\'26','Jun\'27','Jan\'28'],
+    planned:[1,4,10,16,21,25,34,55,76,100],
+    actual:[1,3,7,12,18,24,null,null,null,null]
+  },
+  p5:{
+    labels:['Oct\'25','Nov\'25','Dec\'25','Jan\'26','Feb\'26','Mar\'26','Apr\'26','May\'26','Jun\'26','Jul\'26'],
+    planned:[8,18,30,44,58,70,80,88,95,100],
+    actual:[5,10,15,22,28,30,null,null,null,null]
+  },
+  p6:{
+    labels:['May\'25','Aug\'25','Nov\'25','Jan\'26','Mar\'26','May\'26','Jun\'26'],
+    planned:[10,22,38,50,62,82,100],
+    actual:[8,18,34,48,64,null,null]
+  },
+  p7:{
+    labels:['Sep\'25','Nov\'25','Jan\'26','Mar\'26','Jun\'26','Sep\'26','Jan\'27','May\'27'],
+    planned:[2,6,12,18,28,44,68,100],
+    actual:[1,3,5,8,null,null,null,null]
+  },
+  p8:{
+    labels:['2022','2023','2024','Jan\'25','Jun\'25','Jan\'26','Apr\'26','Jul\'26'],
+    planned:[5,20,45,62,74,82,92,100],
+    actual:[4,18,42,60,72,82,86,null]
+  },
+  p9:{
+    labels:['Jun\'24','Jan\'25','Jun\'25','Jan\'26','Mar\'26','Jun\'26','Jan\'27','Jun\'27','Nov\'27'],
+    planned:[2,8,16,24,28,38,58,78,100],
+    actual:[1,6,12,20,28,null,null,null,null]
+  },
+};
+
+const OMAP={'Harshal':'#0F6E56','Ankit':'#185FA5','Ravinder':'#854F0B','Pravin':'#3B6D11','suresh':'#7c3aed','Manik':'#db2777','sourav':'#0369a1','Vasu':'#d97706','shubham':'#059669','aviral':'#4338ca','deepak':'#b45309','govind':'#7c3aed','praveen':'#db2777','Vineeta':'#0284c7','sonu':'#16a34a','Pankaj':'#b45309','rainabh':'#0891b2','Tarun':'#d97706','gaurav':'#059669'};
+
+const TASKS=[
+  {id:'t1',name:'BOQ & Details submission — Flipspaces',proj:'p1',end:'2026-03-13',status:'Delayed',pct:50,owners:['Harshal','suresh'],critical:true,dur:23,slack:0,dept:'Fit-out'},
+  {id:'t2',name:'BOQ for Change Order — Flipspaces',proj:'p1',end:'2026-03-17',status:'Yet to start',pct:0,owners:['Harshal','Ravinder'],critical:true,dur:4,slack:0,dept:'Fit-out'},
+  {id:'t3',name:'PR & Change order — revised design',proj:'p1',end:'2026-03-21',status:'Yet to start',pct:0,owners:['Harshal'],critical:true,dur:3,slack:0,dept:'Fit-out'},
+  {id:'t4',name:'PR & Signage design & BOQ to contracts',proj:'p1',end:'2026-03-28',status:'Yet to start',pct:0,owners:['Harshal','Vasu'],critical:false,dur:14,slack:7,dept:'Fit-out'},
+  {id:'t5',name:'Change order for Flipspaces',proj:'p1',end:'2026-03-28',status:'Yet to start',pct:0,owners:['Ankit'],critical:true,dur:7,slack:0,dept:'Fit-out'},
+  {id:'t6',name:'Mobilization of Team — Basement',proj:'p1',end:'2026-04-09',status:'Yet to start',pct:0,owners:['suresh'],critical:true,dur:12,slack:0,dept:'Fit-out'},
+  {id:'t7',name:'Contracts & Work Award',proj:'p1',end:'2026-04-15',status:'Yet to start',pct:0,owners:['deepak'],critical:false,dur:25,slack:10,dept:'Fit-out'},
+  {id:'t8',name:'PO for Signage',proj:'p1',end:'2026-04-15',status:'Yet to start',pct:0,owners:['Ankit'],critical:false,dur:14,slack:7,dept:'Fit-out'},
+  {id:'t9',name:'POs of Bought Out Items',proj:'p1',end:'2026-04-11',status:'Yet to start',pct:0,owners:['Ankit'],critical:false,dur:14,slack:7,dept:'Fit-out'},
+  {id:'t10',name:'Remove gypsum board for RCC band',proj:'p1',end:'2026-04-11',status:'Yet to start',pct:0,owners:['suresh'],critical:true,dur:2,slack:0,dept:'Fit-out'},
+  {id:'t11',name:'False ceiling work',proj:'p1',end:'2026-04-30',status:'Yet to start',pct:0,owners:['suresh'],critical:true,dur:5,slack:0,dept:'Fit-out'},
+  {id:'t12',name:'Snag Closure & Cleaning',proj:'p1',end:'2026-05-27',status:'Yet to start',pct:0,owners:['suresh'],critical:true,dur:7,slack:0,dept:'Fit-out'},
+  {id:'t13',name:'STP Commissioning works — long delayed',proj:'p2',end:'2026-03-30',status:'Delayed',pct:0,owners:['Harshal','Pravin','suresh'],critical:true,dur:39,slack:0,dept:'Refurb'},
+  {id:'t14',name:'Handover — STP',proj:'p2',end:'2026-04-02',status:'Yet to start',pct:0,owners:['Harshal','Pravin'],critical:true,dur:3,slack:0,dept:'Refurb'},
+  {id:'t15',name:'LV Cables & Routing Scheme resolution',proj:'p2',end:'2025-10-31',status:'In Progress',pct:0,owners:['praveen','govind'],critical:false,dur:6,slack:5,dept:'Refurb'},
+  {id:'t16',name:'Fabrication — Shaft No. 1 (DG yard)',proj:'p2',end:'2026-04-23',status:'Delayed',pct:0,owners:['Harshal'],critical:true,dur:30,slack:0,dept:'Refurb'},
+  {id:'t17',name:'Primer & Painting — Shaft No. 1',proj:'p2',end:'2026-05-04',status:'Yet to start',pct:0,owners:['Harshal'],critical:true,dur:7,slack:0,dept:'Refurb'},
+  {id:'t18',name:'Installation of Louvers — Shaft No. 1',proj:'p2',end:'2026-05-13',status:'Yet to start',pct:0,owners:['Harshal'],critical:true,dur:7,slack:0,dept:'Refurb'},
+  {id:'t19',name:'Installation of Louvers — Shaft No. 2',proj:'p2',end:'2026-04-02',status:'Delayed',pct:0,owners:['Harshal'],critical:true,dur:6,slack:0,dept:'Refurb'},
+  {id:'t20',name:'Installation of Louvers — Shaft No. 3',proj:'p2',end:'2026-04-13',status:'Delayed',pct:0,owners:['Harshal'],critical:false,dur:11,slack:4,dept:'Refurb'},
+  {id:'t21',name:'Installation of Louvers — Shaft No. 4',proj:'p2',end:'2026-04-14',status:'Delayed',pct:0,owners:['Harshal'],critical:false,dur:12,slack:4,dept:'Refurb'},
+  {id:'t22',name:'Plaster + Floor screed — Terrace Toilets',proj:'p2',end:'2026-03-26',status:'In Progress',pct:0,owners:['suresh'],critical:true,dur:14,slack:0,dept:'Refurb'},
+  {id:'t23',name:'WPC door fixing — Terrace Toilets',proj:'p2',end:'2026-03-27',status:'Yet to start',pct:0,owners:['suresh'],critical:true,dur:10,slack:0,dept:'Refurb'},
+  {id:'t24',name:'Tile works — Terrace Toilets',proj:'p2',end:'2026-04-01',status:'Yet to start',pct:0,owners:['suresh'],critical:true,dur:3,slack:0,dept:'Refurb'},
+  {id:'t25',name:'Painting works — Terrace Toilets',proj:'p2',end:'2026-04-03',status:'Yet to start',pct:0,owners:['suresh'],critical:true,dur:2,slack:0,dept:'Refurb'},
+  {id:'t26',name:'BOQ to Contracts — AC ODU platforms',proj:'p2',end:'2026-03-18',status:'Delayed',pct:50,owners:['Harshal','sonu','Ravinder'],critical:false,dur:113,slack:8,dept:'Refurb'},
+  {id:'t27',name:'Work Award — AC ODU platforms',proj:'p2',end:'2026-04-02',status:'Yet to start',pct:0,owners:['Ankit'],critical:false,dur:11,slack:8,dept:'Refurb'},
+  {id:'t28',name:'Work award — PCC Flooring / SBI Hardscaping',proj:'p2',end:'2026-05-05',status:'In Progress',pct:15,owners:['Harshal'],critical:false,dur:29,slack:12,dept:'Refurb'},
+  {id:'t29',name:'Fabrication — Shaft No. 5 (Central Yard)',proj:'p2',end:'2026-04-24',status:'Yet to start',pct:0,owners:['Harshal'],critical:false,dur:16,slack:6,dept:'Refurb'},
+  {id:'t30',name:'Primer & Painting — Shaft No. 5',proj:'p2',end:'2026-05-04',status:'Yet to start',pct:0,owners:['Harshal'],critical:false,dur:6,slack:6,dept:'Refurb'},
+  {id:'t31',name:'Installation of Louvers — Shaft No. 5',proj:'p2',end:'2026-05-19',status:'Yet to start',pct:0,owners:['Harshal'],critical:false,dur:11,slack:6,dept:'Refurb'},
+  {id:'t32',name:'HCC Approval process — Phase 1',proj:'p3',end:'2026-04-15',status:'In Progress',pct:60,owners:['sourav'],critical:true,dur:60,slack:0,dept:'Refurb'},
+  {id:'t33',name:'Structural Strengthening & Waterproofing',proj:'p3',end:'2026-05-30',status:'In Progress',pct:25,owners:['sourav'],critical:false,dur:90,slack:14,dept:'Refurb'},
+  {id:'t34',name:'Foundation works — 88 Infinity',proj:'p4',end:'2026-06-30',status:'In Progress',pct:40,owners:['Manik'],critical:true,dur:120,slack:0,dept:'Greenfield'},
+  {id:'t35',name:'Structural frame — 88 Infinity',proj:'p4',end:'2027-06-30',status:'Yet to start',pct:0,owners:['Manik'],critical:true,dur:365,slack:0,dept:'Greenfield'},
+  {id:'t36',name:'Nuvama — Detailed Drawings + GFC',proj:'p5',end:'2026-04-06',status:'In Progress',pct:80,owners:['sonu','gaurav'],critical:true,dur:10,slack:0,dept:'Fit-out'},
+  {id:'t37',name:'Nuvama — Civil work + Concealed MEP (Washroom)',proj:'p5',end:'2026-05-15',status:'Yet to start',pct:0,owners:['Ankit'],critical:true,dur:39,slack:0,dept:'Fit-out'},
+  {id:'t38',name:'Nuvama — Framing of Partitions + Glazing',proj:'p5',end:'2026-05-05',status:'Yet to start',pct:0,owners:['Ankit'],critical:true,dur:17,slack:0,dept:'Fit-out'},
+  {id:'t39',name:'Nuvama — MEP works: Fire Fighting',proj:'p5',end:'2026-04-15',status:'Yet to start',pct:0,owners:['Ankit'],critical:false,dur:17,slack:5,dept:'Fit-out'},
+  {id:'t40',name:'Nuvama — POs for Bought Out Items',proj:'p5',end:'2026-04-28',status:'Yet to start',pct:0,owners:['Vineeta','sonu'],critical:false,dur:17,slack:8,dept:'Fit-out'},
+  {id:'t41',name:'25 Brabourne facade works',proj:'p6',end:'2026-04-30',status:'In Progress',pct:55,owners:['sourav'],critical:false,dur:45,slack:10,dept:'Refurb'},
+  {id:'t42',name:'25 Brabourne MEP completion',proj:'p6',end:'2026-05-31',status:'Yet to start',pct:0,owners:['Pravin'],critical:true,dur:30,slack:0,dept:'Refurb'},
+  {id:'t43',name:'FBB structural works Phase 1',proj:'p7',end:'2026-06-30',status:'In Progress',pct:15,owners:['Harshal'],critical:true,dur:120,slack:0,dept:'Refurb'},
+  {id:'t44',name:'One Forbes — final snag list closure',proj:'p8',end:'2026-04-30',status:'In Progress',pct:80,owners:['Harshal'],critical:true,dur:30,slack:0,dept:'Refurb'},
+  {id:'t45',name:'One Forbes — commissioning & handover',proj:'p8',end:'2026-06-30',status:'Yet to start',pct:0,owners:['Harshal','Pravin'],critical:true,dur:60,slack:0,dept:'Refurb'},
+  {id:'t46',name:'Ballygaunge structural — Phase 1',proj:'p9',end:'2026-09-30',status:'In Progress',pct:20,owners:['sourav'],critical:true,dur:180,slack:0,dept:'Greenfield'},
+  {id:'t47',name:'Ballygaunge MEP design package',proj:'p9',end:'2026-06-30',status:'Yet to start',pct:0,owners:['Pravin'],critical:false,dur:90,slack:30,dept:'Greenfield'},
+];
+
+const SUM_TASKS=[
+  {name:'Basement Fit-out Works (Balance)',proj:'Basement Fitouts',planned:100,actual:12,status:'Delayed'},
+  {name:'Design & Sample Approval',proj:'Basement Fitouts',planned:100,actual:35,status:'Delayed'},
+  {name:'Service Shaft Louvers',proj:'Thapar Janpath',planned:100,actual:40,status:'Delayed'},
+  {name:'STP Testing & Commissioning',proj:'Thapar Janpath',planned:100,actual:33,status:'Delayed'},
+  {name:'Phase-2 Contract Stage',proj:'Thapar Janpath',planned:100,actual:52,status:'In Progress'},
+  {name:'Phase-2 Construction Stage',proj:'Thapar Janpath',planned:80,actual:8,status:'Delayed'},
+  {name:'Nuvama Pre-Construction',proj:'Nuvama Fit-outs',planned:100,actual:66,status:'In Progress'},
+  {name:'Nuvama Construction (Fit-out)',proj:'Nuvama Fit-outs',planned:15,actual:3,status:'In Progress'},
+  {name:'Nuvama Contracts & Work Award',proj:'Nuvama Fit-outs',planned:100,actual:34,status:'In Progress'},
+  {name:'Nuvama Design Development',proj:'Nuvama Fit-outs',planned:100,actual:76,status:'In Progress'},
+  {name:'Terrace Toilet Refurb',proj:'Thapar Janpath',planned:100,actual:24,status:'In Progress'},
+  {name:'HCC Approval Process',proj:'Thapar Compound',planned:100,actual:60,status:'In Progress'},
+  {name:'25 Brabourne Facade',proj:'25 Brabourne',planned:100,actual:55,status:'In Progress'},
+  {name:'One Forbes Final Stretch',proj:'One Forbes',planned:100,actual:80,status:'In Progress'},
+];
+
+const CP_CHAINS=[
+  {title:'BOQ → Work Award → Construction — Basement',meta:'Basement Fitouts (Ph-2&3) · Target: 27 May 2026',risk:'CRITICAL',rc:'critical',tasks:['t1','t2','t3','t5','t6','t10','t11','t12'],exp:'BOQ submission already 17 days overdue. Every downstream task has zero float — any further delay directly shifts the 27 May handover date.'},
+  {title:'STP Commissioning → Building Handover',meta:'Thapar House Janpath · Target: 2 Apr 2026',risk:'CRITICAL',rc:'critical',tasks:['t13','t14'],exp:'STP stalled since Feb. COO flagged urgency in PRM_MCS_02 Mar. Handover cannot proceed until commissioning is complete.'},
+  {title:'Service Shaft Louvers — Full Install Chain',meta:'Thapar House Janpath · Target: 13 May 2026',risk:'HIGH',rc:'high',tasks:['t16','t17','t18'],exp:'NDMC permission for Shaft 1 received 21 Feb. Fabrication→paint→install chain has zero float. Shaft 5 permission still pending.'},
+  {title:'Terrace Toilet Refurbishment Sequence',meta:'Thapar House Janpath · Target: 3 Apr 2026',risk:'MEDIUM',rc:'medium',tasks:['t22','t23','t24','t25'],exp:'In progress but tight 3-week sequence. Plaster/screed behind schedule cascades into tiling and painting with no buffer.'},
+  {title:'Nuvama — Design to GFC to Construction',meta:'Nuvama 4th Floor Fit-outs · Target: 14 Jul 2026',risk:'HIGH',rc:'high',tasks:['t36','t37','t38'],exp:'GFC issuance in final phase. Civil works and fit-out construction start imminently. Chain has zero float against the 14 Jul handover.'},
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let activePage='overview';
+let F={proj:'all',dept:'all',sh:'all',time:'all',status:'all',q:''};
+let CHARTS={};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init(){
+  const ps=document.getElementById('fProj');
+  PROJ.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.short;ps.appendChild(o)});
+  const ss=document.getElementById('fSH');
+  [...new Set(TASKS.flatMap(t=>t.owners))].sort().forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o.charAt(0).toUpperCase()+o.slice(1);ss.appendChild(el)});
+  const sp=document.getElementById('scProj');
+  PROJ.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.short;sp.appendChild(o)});
+  applyFilters();
+  renderOverviewCharts();
+  renderSCurveCharts();
+  renderProductivityCharts();
+}
+
+function applyFilters(){
+  F.proj=document.getElementById('fProj').value;
+  F.dept=document.getElementById('fDept').value;
+  F.sh=document.getElementById('fSH').value;
+  F.time=document.getElementById('fTime').value;
+  F.status=document.getElementById('fStatus').value;
+  F.q=(document.getElementById('searchInput')||{}).value?.toLowerCase()||'';
+  updateKPIs();
+  updateBadges();
+  if(activePage==='tasks') renderTaskTable();
+  if(activePage==='critical') renderCritical();
+  if(activePage==='projects') renderProjects();
+  updateOverviewCharts();
+}
+
+function resetFilters(){
+  document.getElementById('fProj').value='all';
+  document.getElementById('fDept').value='all';
+  document.getElementById('fSH').value='all';
+  document.getElementById('fTime').value='all';
+  document.getElementById('fStatus').value='all';
+  if(document.getElementById('searchInput')) document.getElementById('searchInput').value='';
+  applyFilters();
+}
+
+function setPage(p,el){
+  activePage=p;
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['overview','scurve','productivity','tasks','critical','projects'].forEach(id=>{
+    document.getElementById('page-'+id).style.display=id===p?'':'none';
+  });
+  if(p==='tasks') renderTaskTable();
+  if(p==='critical') renderCritical();
+  if(p==='projects') renderProjects();
+  if(p==='scurve') renderSCurve();
+}
+
+// ─── FILTER HELPERS ───────────────────────────────────────────────────────────
+function ftasks(incComp=false){
+  return TASKS.filter(t=>{
+    if(!incComp&&t.status==='Completed') return false;
+    if(F.proj!=='all'&&t.proj!==F.proj) return false;
+    if(F.dept!=='all'&&t.dept!==F.dept) return false;
+    if(F.sh!=='all'&&!t.owners.includes(F.sh)) return false;
+    if(F.status!=='all'&&t.status!==F.status) return false;
+    const e=new Date(t.end);
+    if(F.time==='overdue'&&!(e<TODAY)) return false;
+    if(F.time==='week'&&!(e>=TODAY&&e<=WK_END)) return false;
+    if(F.time==='month'&&!(e>WK_END&&e<=MO_END)) return false;
+    if(F.time==='q'&&!(e<=Q_END)) return false;
+    if(F.q){const pr=PROJ.find(p=>p.id===t.proj);const h=(t.name+' '+(pr?pr.name:'')).toLowerCase();if(!h.includes(F.q)) return false;}
+    return true;
+  });
+}
+
+function fprojs(){
+  return PROJ.filter(p=>{
+    if(F.proj!=='all'&&p.id!==F.proj) return false;
+    if(F.dept!=='all'&&p.dept!==F.dept) return false;
+    return true;
+  });
+}
+
+// ─── KPIs ─────────────────────────────────────────────────────────────────────
+function updateKPIs(){
+  const t=ftasks();const pr=fprojs();
+  const ov=t.filter(x=>new Date(x.end)<TODAY);
+  const wk=t.filter(x=>{const e=new Date(x.end);return e>=TODAY&&e<=WK_END;});
+  const mo=t.filter(x=>{const e=new Date(x.end);return e>WK_END&&e<=MO_END;});
+  const cp=t.filter(x=>x.critical);
+  const avgP=pr.length?Math.round(pr.reduce((a,p)=>a+p.pct,0)/pr.length):0;
+  const delayed=t.filter(x=>x.status==='Delayed').length;
+  document.getElementById('kpiStrip').innerHTML=`
+    <div class="kpi red"><div class="kpi-lbl">Overdue tasks</div><div class="kpi-val">${ov.length}</div><div class="kpi-sub">${[...new Set(ov.map(x=>x.proj))].length} projects affected</div></div>
+    <div class="kpi amb"><div class="kpi-lbl">Due this week</div><div class="kpi-val">${wk.length}</div><div class="kpi-sub">by 6 Apr 2026</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Due in 30 days</div><div class="kpi-val">${mo.length}</div><div class="kpi-sub">by 30 Apr 2026</div></div>
+    <div class="kpi red"><div class="kpi-lbl">Delayed tasks</div><div class="kpi-val">${delayed}</div><div class="kpi-sub">require immediate action</div></div>
+    <div class="kpi teal"><div class="kpi-lbl">Critical path</div><div class="kpi-val">${cp.length}</div><div class="kpi-sub">zero-float tasks</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">Portfolio avg.</div><div class="kpi-val">${avgP}%</div><div class="kpi-sub">weighted completion</div></div>
+  `;
+}
+
+function updateBadges(){
+  const t=ftasks();const pr=fprojs();
+  document.getElementById('tBadge').textContent=t.length;
+  document.getElementById('cpBadge').textContent=t.filter(x=>x.critical).length;
+  document.getElementById('prBadge').textContent=pr.length;
+  document.getElementById('scBadge').textContent=pr.length;
+}
+
+// ─── CHART HELPERS ─────────────────────────────────────────────────────────────
+const COLORS_PROJ=['#c9a84c','#1a7f6e','#1e5fa8','#c0392b','#5b21b6','#d97706','#0369a1','#065f46','#9d174d','#4338ca'];
+function mkChart(id,cfg){if(CHARTS[id]) CHARTS[id].destroy();const c=document.getElementById(id);if(!c)return null;CHARTS[id]=new Chart(c.getContext('2d'),cfg);return CHARTS[id];}
+
+// ─── OVERVIEW CHARTS ──────────────────────────────────────────────────────────
+function renderOverviewCharts(){
+  // Portfolio S-curve
+  mkChart('cPortfolioS',{type:'line',data:{labels:SC_DATA.portfolio.labels,datasets:[
+    {label:'Planned',data:SC_DATA.portfolio.planned,borderColor:'#c9a84c',backgroundColor:'rgba(201,168,76,.07)',borderWidth:2,borderDash:[5,3],fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#c9a84c'},
+    {label:'Actual',data:SC_DATA.portfolio.actual,borderColor:'#1a7f6e',backgroundColor:'rgba(26,127,110,.08)',borderWidth:2.5,fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#1a7f6e',spanGaps:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:10}}},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y??'—'}%`}}},scales:{x:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10},callback:v=>v+'%'},min:0,max:100}}}});
+  // Donut
+  renderDonut(TASKS);
+  // Dept bar
+  mkChart('cDept',{type:'bar',data:{labels:['Fit-out','Refurb','Greenfield','Internal'],datasets:[{label:'Open',data:[
+    TASKS.filter(t=>t.dept==='Fit-out'&&t.status!=='Completed').length,
+    TASKS.filter(t=>t.dept==='Refurb'&&t.status!=='Completed').length,
+    TASKS.filter(t=>t.dept==='Greenfield'&&t.status!=='Completed').length,
+    TASKS.filter(t=>t.dept==='Internal'&&t.status!=='Completed').length,
+  ],backgroundColor:['#1e5fa8','#0F6E56','#c9a84c','rgba(13,17,23,.2)'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.x} tasks`}}},scales:{x:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  // Summary bar
+  const sh=SUM_TASKS.map(t=>t.name.length>30?t.name.slice(0,28)+'…':t.name);
+  document.getElementById('sumBarWrap').style.height=(SUM_TASKS.length*34+50)+'px';
+  mkChart('cSumBar',{type:'bar',data:{labels:sh,datasets:[
+    {label:'Planned %',data:SUM_TASKS.map(t=>t.planned),backgroundColor:'rgba(201,168,76,.2)',borderColor:'#c9a84c',borderWidth:1,borderRadius:2},
+    {label:'Actual %',data:SUM_TASKS.map(t=>t.actual),backgroundColor:'#1a7f6e',borderRadius:2},
+  ]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{grid:{color:'rgba(13,17,23,.05)'},max:100,ticks:{callback:v=>v+'%',font:{size:9}}},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
+  // Stakeholder bar
+  renderSHBar(TASKS);
+}
+
+function renderDonut(tasks){
+  const counts={d:tasks.filter(t=>t.status==='Delayed').length,i:tasks.filter(t=>t.status==='In Progress').length,y:tasks.filter(t=>t.status==='Yet to start').length,c:tasks.filter(t=>t.status==='Completed').length};
+  mkChart('cDonut',{type:'doughnut',data:{labels:['Delayed','In Progress','Yet to start','Completed'],datasets:[{data:[counts.d,counts.i,counts.y,counts.c],backgroundColor:['#c0392b','#1a7f6e','#d97706','#1a6b3c'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed}`}}}}});
+  const tot=counts.d+counts.i+counts.y+counts.c;
+  document.getElementById('donutLeg').innerHTML=[['Delayed','#c0392b',counts.d],['In Progress','#1a7f6e',counts.i],['Yet to start','#d97706',counts.y],['Completed','#1a6b3c',counts.c]].map(([l,c,v])=>`<div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:${c};display:inline-block"></span>${l}</span><span style="font-family:var(--mono);font-size:10px;color:rgba(13,17,23,.4)">${v}/${tot}</span></div>`).join('');
+}
+
+function renderSHBar(tasks){
+  const owners=['Harshal','suresh','Ankit','Ravinder','Pravin','sourav','Manik'];
+  const open=owners.map(o=>tasks.filter(t=>t.owners.includes(o)&&t.status!=='Completed').length);
+  const del=owners.map(o=>tasks.filter(t=>t.owners.includes(o)&&t.status==='Delayed').length);
+  mkChart('cSH',{type:'bar',data:{labels:owners.map(o=>o.charAt(0).toUpperCase()+o.slice(1)),datasets:[
+    {label:'Open',data:open,backgroundColor:'#1e5fa8',borderRadius:3},
+    {label:'Delayed',data:del,backgroundColor:'#c0392b',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}}}}});
+}
+
+function updateOverviewCharts(){
+  const t=ftasks();
+  renderDonut(t);
+  const dl=[
+    t.filter(x=>x.dept==='Fit-out'&&x.status!=='Completed').length,
+    t.filter(x=>x.dept==='Refurb'&&x.status!=='Completed').length,
+    t.filter(x=>x.dept==='Greenfield'&&x.status!=='Completed').length,
+    t.filter(x=>x.dept==='Internal'&&x.status!=='Completed').length,
+  ];
+  if(CHARTS['cDept']){CHARTS['cDept'].data.datasets[0].data=dl;CHARTS['cDept'].update();}
+  renderSHBar(t);
+}
+
+// ─── S-CURVE PAGE ─────────────────────────────────────────────────────────────
+function renderSCurveCharts(){
+  renderSCurve();
+  // SPI
+  const spiData=PROJ.filter(p=>p.pct>0).map(p=>{
+    const d=SC_DATA[p.id];if(!d)return{name:p.short,spi:1};
+    const n=d.actual.filter(v=>v!==null).length;
+    const planned=d.planned[n-1]||1;
+    const actual=d.actual[n-1]||0;
+    return{name:p.short,spi:Math.round((actual/planned)*100)/100};
+  });
+  mkChart('cSPI',{type:'bar',data:{labels:spiData.map(d=>d.name),datasets:[{label:'SPI',data:spiData.map(d=>d.spi),backgroundColor:spiData.map(d=>d.spi>=0.85?'#1a7f6e':d.spi>=0.7?'#d97706':'#c0392b'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` SPI: ${c.parsed.y.toFixed(2)}`}},annotation:{annotations:{line1:{type:'line',yMin:1,yMax:1,borderColor:'rgba(13,17,23,.2)',borderWidth:1,borderDash:[4,4]}}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'rgba(13,17,23,.05)'},min:0,max:1.5,ticks:{font:{size:10}}}}}});
+  // Variance (planned end vs forecast end)
+  const vp=PROJ.map(p=>{
+    const days=Math.round((new Date(p.end)-new Date(p.start))/(1000*60*60*24));
+    const consumed=Math.round((TODAY-new Date(p.start))/(1000*60*60*24));
+    const timePct=Math.min(Math.round(consumed/days*100),100);
+    const gap=timePct-p.pct;
+    return{name:p.short,gap};
+  });
+  mkChart('cVariance',{type:'bar',data:{labels:vp.map(d=>d.name),datasets:[{label:'Schedule variance (%)',data:vp.map(d=>d.gap),backgroundColor:vp.map(d=>d.gap<=0?'#1a7f6e':d.gap<=15?'#d97706':'#c0392b'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` Variance: ${c.parsed.y>0?'+':''}${c.parsed.y}%`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10},callback:v=>(v>0?'+':'')+v+'%'}}}}});
+}
+
+function renderSCurve(){
+  const sel=document.getElementById('scProj').value;
+  const mode=document.getElementById('scMode').value;
+  const d=SC_DATA[sel]||SC_DATA.portfolio;
+  const pData=d.planned;
+  const aData=[...d.actual];
+
+  // Forecast: extend actual with simple linear projection
+  const lastActualIdx=aData.reduce((a,v,i)=>v!==null?i:a,-1);
+  const forecast=[...aData];
+  if(lastActualIdx>=0&&lastActualIdx<d.labels.length-1){
+    const remaining=d.labels.length-1-lastActualIdx;
+    const needed=100-(aData[lastActualIdx]||0);
+    for(let i=1;i<=remaining;i++){
+      forecast[lastActualIdx+i]=Math.min(100,Math.round((aData[lastActualIdx]||0)+(needed*(i/remaining))));
+    }
+  }
+
+  mkChart('cSCurveMain',{type:'line',data:{labels:d.labels,datasets:[
+    {label:'Planned',data:pData,borderColor:'#c9a84c',backgroundColor:'rgba(201,168,76,.08)',borderWidth:2,borderDash:[5,3],fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#c9a84c'},
+    {label:'Actual',data:aData,borderColor:'#1a7f6e',backgroundColor:'rgba(26,127,110,.1)',borderWidth:2.5,fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#1a7f6e',spanGaps:false},
+    {label:'Forecast',data:forecast,borderColor:'#1e5fa8',borderWidth:1.5,borderDash:[3,4],fill:false,tension:.4,pointRadius:2,pointBackgroundColor:'#1e5fa8',spanGaps:true},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:10}}},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y??'—'}%`}}},scales:{x:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10},callback:v=>v+'%'},min:0,max:100}}}});
+
+  // Insight text
+  const pr=PROJ.find(p=>p.id===sel);
+  const lastA=aData[lastActualIdx];
+  const lastP=pData[lastActualIdx];
+  const lag=(lastP||0)-(lastA||0);
+  const insightEl=document.getElementById('scInsight');
+  if(sel==='portfolio'){
+    insightEl.innerHTML=`<strong>Portfolio insight:</strong> As of March 2026, the portfolio is running at <strong>${lag}% behind the planned curve</strong>. Two critical projects (Basement Fitouts, STP Commissioning) are the primary drivers of the lag. The forecast line shows recovery is achievable but requires immediate resolution of the 4 identified critical path chains.`;
+  } else if(pr){
+    const daysLeft=Math.round((new Date(pr.end)-TODAY)/(1000*60*60*24));
+    insightEl.innerHTML=`<strong>${pr.name}:</strong> ${lag>0?`Running <strong>${lag}% behind planned curve</strong>. At current velocity, the project may need a schedule revision.`:`<strong>Ahead of planned curve</strong> by ${Math.abs(lag)}%.`} ${pr.pct}% complete overall. ${daysLeft>0?`${daysLeft} days remaining to planned completion (${new Date(pr.end).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}).`:`<strong style="color:#c0392b">Planned end date has passed.</strong>`}`;
+  }
+
+  // Legend
+  document.getElementById('scLegend').innerHTML=`
+    <div class="legend-item"><div class="legend-dot" style="background:#c9a84c;border:1px dashed #c9a84c"></div>Planned baseline</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1a7f6e"></div>Actual progress</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1e5fa8;opacity:.7;border:1px dashed #1e5fa8"></div>Forecast (linear projection)</div>
+  `;
+}
+
+// ─── PRODUCTIVITY CHARTS ──────────────────────────────────────────────────────
+function renderProductivityCharts(){
+  // Task closure rate (simulated monthly from task completed dates)
+  mkChart('cClosureRate',{type:'bar',data:{labels:['Oct','Nov','Dec','Jan','Feb','Mar'],datasets:[{label:'Tasks closed',data:[4,8,11,14,17,22],backgroundColor:'#1a7f6e',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}}}}});
+  // Issue density
+  mkChart('cIssues',{type:'bar',data:{labels:PROJ.filter(p=>p.issues>0).map(p=>p.short),datasets:[{label:'Open issues',data:PROJ.filter(p=>p.issues>0).map(p=>p.issues),backgroundColor:PROJ.filter(p=>p.issues>0).map(p=>p.issues>10?'#c0392b':p.issues>5?'#d97706':'#1a7f6e'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:8}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}}}}});
+  // Completion ratio
+  mkChart('cCompRatio',{type:'bar',data:{labels:PROJ.map(p=>p.short),datasets:[
+    {label:'Closed',data:PROJ.map(p=>p.closed),backgroundColor:'#1a6b3c',borderRadius:3,stack:'s'},
+    {label:'Open',data:PROJ.map(p=>p.open),backgroundColor:'rgba(13,17,23,.12)',borderRadius:3,stack:'s'},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:9}}}},scales:{x:{grid:{display:false},ticks:{font:{size:8}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}}}}});
+  // Delay profile
+  const dp=PROJ.map(p=>{const pt=TASKS.filter(t=>t.proj===p.id);return{name:p.short,delayed:pt.filter(t=>t.status==='Delayed').length,ok:pt.filter(t=>t.status!=='Delayed'&&t.status!=='Completed').length};});
+  mkChart('cDelayProfile',{type:'bar',data:{labels:dp.map(d=>d.name),datasets:[
+    {label:'On track',data:dp.map(d=>d.ok),backgroundColor:'#1a7f6e',borderRadius:3,stack:'s'},
+    {label:'Delayed',data:dp.map(d=>d.delayed),backgroundColor:'#c0392b',borderRadius:3,stack:'s'},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:9}}}},scales:{x:{grid:{display:false},ticks:{font:{size:8}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}}}}});
+
+  // EVM
+  const PV=Math.round(PROJ.reduce((a,p)=>{
+    const days=Math.round((new Date(p.end)-new Date(p.start))/(1000*60*60*24));
+    const consumed=Math.round((TODAY-new Date(p.start))/(1000*60*60*24));
+    return a+(Math.min(consumed/days,1)*p.budget);
+  },0));
+  const EV=Math.round(PROJ.reduce((a,p)=>a+(p.pct/100*p.budget),0));
+  const AC=Math.round(EV*0.88); // AC simulated as slightly under EV
+  const SPI_val=(EV/PV).toFixed(2);
+  const CPI_val=(EV/AC).toFixed(2);
+  const SV=EV-PV;const CV=EV-AC;
+  document.getElementById('evmStrip').innerHTML=`
+    <div class="evm-card"><div class="evm-lbl">Planned Value (PV)</div><div class="evm-val blue">${PV}</div><div class="evm-sub">Scheduled work value</div></div>
+    <div class="evm-card"><div class="evm-lbl">Earned Value (EV)</div><div class="evm-val ${EV>=PV?'green':'amb'}">${EV}</div><div class="evm-sub ${SV>=0?'pos':'neg'}">SV: ${SV>=0?'+':''}${SV} vs plan</div></div>
+    <div class="evm-card"><div class="evm-lbl">SPI</div><div class="evm-val ${SPI_val>=1?'green':SPI_val>=0.8?'amb':'red'}">${SPI_val}</div><div class="evm-sub ${SPI_val>=1?'pos':'neg'}">${SPI_val>=1?'On / ahead of schedule':'Behind schedule'}</div></div>
+    <div class="evm-card"><div class="evm-lbl">Actual Cost (AC)</div><div class="evm-val">${AC}</div><div class="evm-sub">Approximate spend index</div></div>
+    <div class="evm-card"><div class="evm-lbl">CPI</div><div class="evm-val ${CPI_val>=1?'green':CPI_val>=0.9?'amb':'red'}">${CPI_val}</div><div class="evm-sub ${CPI_val>=1?'pos':'neg'}">${CPI_val>=1?'Under budget':'Over budget'}</div></div>
+    <div class="evm-card"><div class="evm-lbl">Cost Variance (CV)</div><div class="evm-val ${CV>=0?'green':'red'}">${CV>=0?'+':''}${CV}</div><div class="evm-sub">EV − AC</div></div>
+  `;
+  mkChart('cEVM',{type:'bar',data:{labels:PROJ.filter(p=>p.pct>0).map(p=>p.short),datasets:[
+    {label:'PV',data:PROJ.filter(p=>p.pct>0).map(p=>{const days=Math.round((new Date(p.end)-new Date(p.start))/(1000*60*60*24));const con=Math.round((TODAY-new Date(p.start))/(1000*60*60*24));return Math.round(Math.min(con/days,1)*100);}),backgroundColor:'rgba(201,168,76,.4)',borderRadius:3},
+    {label:'EV',data:PROJ.filter(p=>p.pct>0).map(p=>p.pct),backgroundColor:'#1a7f6e',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:8}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10},callback:v=>v+'%'},max:100}}}});
+
+  // Time elapsed vs progress (scatter)
+  const pts=PROJ.map(p=>{
+    const days=Math.round((new Date(p.end)-new Date(p.start))/(1000*60*60*24));
+    const con=Math.round((TODAY-new Date(p.start))/(1000*60*60*24));
+    const te=Math.min(Math.round(con/days*100),100);
+    return{x:te,y:p.pct,label:p.short};
+  });
+  mkChart('cEfficiency',{type:'scatter',data:{datasets:[
+    {label:'Projects',data:pts,backgroundColor:COLORS_PROJ.slice(0,pts.length),pointRadius:8,pointHoverRadius:10},
+    {label:'On-schedule line',data:[{x:0,y:0},{x:100,y:100}],type:'line',borderColor:'rgba(13,17,23,.15)',borderWidth:1,borderDash:[4,4],pointRadius:0,showLine:true},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const p=c.raw;return[`${pts[c.dataIndex]?.label||''}`,`Time: ${p.x}% | Progress: ${p.y}%`];}}}},scales:{x:{grid:{color:'rgba(13,17,23,.05)'},title:{display:true,text:'Time elapsed (%)',font:{size:10}},ticks:{font:{size:10}},min:0,max:110},y:{grid:{color:'rgba(13,17,23,.05)'},title:{display:true,text:'Tasks complete (%)',font:{size:10}},ticks:{font:{size:10},callback:v=>v+'%'},min:0,max:110}}}});
+
+  // Velocity
+  mkChart('cVelocity',{type:'bar',data:{labels:['Oct','Nov','Dec','Jan','Feb','Mar'],datasets:[
+    {label:'Tasks completed',data:[4,8,11,14,17,22],backgroundColor:'#1a6b3c',borderRadius:3},
+    {label:'New tasks opened',data:[15,22,18,12,8,6],backgroundColor:'rgba(201,168,76,.5)',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(13,17,23,.05)'},ticks:{font:{size:10}}}}}});
+}
+
+// ─── TASK TABLE ───────────────────────────────────────────────────────────────
+function renderTaskTable(){
+  const tasks=ftasks();
+  const tbody=document.getElementById('taskBody');
+  if(!tasks.length){tbody.innerHTML=`<tr><td colspan="10"><div class="empty">No tasks match current filters.</div></td></tr>`;return;}
+  const sorted=[...tasks].sort((a,b)=>{if(a.critical&&!b.critical)return -1;if(!a.critical&&b.critical)return 1;return new Date(a.end)-new Date(b.end);});
+  tbody.innerHTML=sorted.map(t=>{
+    const pr=PROJ.find(p=>p.id===t.proj);
+    const e=new Date(t.end);const dl=Math.round((e-TODAY)/(1000*60*60*24));
+    const tb=t.status==='Completed'?'':dl<0?`<span class="badge overdue">${Math.abs(dl)}d overdue</span>`:e<=WK_END?`<span class="badge wk">this week</span>`:e<=MO_END?`<span class="badge mo">30 days</span>`:`<span class="badge later">later</span>`;
+    const sb=`<span class="badge ${t.status==='Delayed'?'delayed':t.status==='In Progress'?'ip':t.status==='Yet to start'?'yts':'done'}">${t.status}</span>`;
+    const db=`<span class="badge ${t.dept==='Fit-out'?'fitout':t.dept==='Refurb'?'refurb':t.dept==='Greenfield'?'green-f':'int'}">${t.dept}</span>`;
+    const pc=t.pct>=70?'#1a6b3c':t.pct>=40?'#1a7f6e':t.pct>=20?'#d97706':'#c0392b';
+    const sc=t.slack===0?'zero':t.slack<=5?'low':'ok';
+    const chips=t.owners.slice(0,2).map(o=>`<span class="oc"><span class="av" style="background:${OMAP[o]||'#1a7f6e'}">${o.slice(0,2).toUpperCase()}</span>${o.charAt(0).toUpperCase()+o.slice(1)}</span>`).join('');
+    return`<tr>
+      <td style="text-align:center">${t.critical?'<span style="color:var(--red);font-size:10px;font-weight:700">⚑</span>':''}</td>
+      <td class="tnc"><span class="tn">${t.name}</span><span class="tp">${pr?pr.short:''}</span></td>
+      <td style="font-size:11px;color:rgba(13,17,23,.55)">${pr?pr.short:'—'}</td>
+      <td>${db}</td>
+      <td><div class="owners">${chips}</div></td>
+      <td style="font-family:var(--mono);font-size:11px;white-space:nowrap">${e.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'})}</td>
+      <td>${tb}</td>
+      <td>${sb}</td>
+      <td><div class="pbar"><div class="pbar-track"><div class="pbar-fill" style="width:${t.pct}%;background:${pc}"></div></div><span class="pbar-val">${t.pct}%</span></div></td>
+      <td><div class="slack ${sc}">${t.slack===0?'⚑ Zero':t.slack+'d'}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── CRITICAL PATH ────────────────────────────────────────────────────────────
+function renderCritical(){
+  const shF=F.sh;
+  let html='';
+  CP_CHAINS.forEach(ch=>{
+    const tl=TASKS.filter(t=>ch.tasks.includes(t.id));
+    const ft=shF==='all'?tl:tl.filter(t=>t.owners.includes(shF));
+    if(!ft.length) return;
+    const rc={'CRITICAL':'var(--red)','HIGH':'var(--amb)','MEDIUM':'var(--blue)'}[ch.risk]||'var(--blue)';
+    html+=`<div class="cp-chain ${ch.rc}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:3px;gap:8px">
+        <div class="cp-ct">${ch.title}</div>
+        <span class="badge" style="background:${rc}18;color:${rc};border:1px solid ${rc}40;flex-shrink:0">${ch.risk}</span>
+      </div>
+      <div class="cp-cm">${ch.meta}</div>
+      <div class="cp-exp">${ch.exp}</div>
+      <div class="cp-steps">`;
+    tl.forEach((t,i)=>{
+      const e=new Date(t.end);const d=Math.round((e-TODAY)/(1000*60*60*24));
+      const dc=t.status==='Completed'?'done':t.status==='In Progress'?'active':d<0?'late':'soon';
+      const sc=t.slack===0?'zero':t.slack<=5?'low':'ok';
+      const chips=t.owners.slice(0,2).map(o=>`<span class="oc"><span class="av" style="background:${OMAP[o]||'#1a7f6e'}">${o.slice(0,2).toUpperCase()}</span>${o.charAt(0).toUpperCase()+o.slice(1)}</span>`).join('');
+      html+=`<div class="cp-step">
+        <div class="cp-conn"><div class="cp-dot ${dc}"></div>${i<tl.length-1?'<div class="cp-vl"></div>':''}</div>
+        <div class="cp-sc">
+          <div class="cp-sn">${i+1}. ${t.name}</div>
+          <div class="cp-sr">
+            <span class="badge ${t.status==='Delayed'?'delayed':t.status==='In Progress'?'ip':'yts'}">${t.status}</span>
+            <span style="font-size:10px;color:rgba(13,17,23,.4)">${e.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} · ${t.dur}d</span>
+            ${chips}
+          </div>
+          <div class="cp-slk ${sc}">${t.slack===0?'⚑ Zero slack — delays push end date':`Float: ${t.slack}d available`}</div>
+        </div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  if(!html) html='<div class="empty" style="grid-column:1/-1">No critical chains match current filter.</div>';
+  document.getElementById('cpGrid').innerHTML=html;
+}
+
+// ─── PROJECTS ────────────────────────────────────────────────────────────────
+function renderProjects(){
+  const pr=fprojs();
+  if(!pr.length){document.getElementById('projGrid').innerHTML='<div class="empty">No projects match current filters.</div>';return;}
+  document.getElementById('projGrid').innerHTML=pr.map(p=>{
+    const e=new Date(p.end);const dl=Math.round((e-TODAY)/(1000*60*60*24));
+    const atRisk=dl<60&&p.pct<60;
+    const fc=p.pct>=70?'#1a6b3c':p.pct>=40?'#1a7f6e':p.pct>=20?'#d97706':'#c0392b';
+    const pt=TASKS.filter(t=>t.proj===p.id);
+    const delayed=pt.filter(t=>t.status==='Delayed').length;
+    const db=`<span class="badge ${p.dept==='Fit-out'?'fitout':p.dept==='Refurb'?'refurb':p.dept==='Greenfield'?'green-f':'int'}">${p.dept}</span>`;
+    const dlStr=dl<0?`<span style="color:var(--red);font-weight:600">${Math.abs(dl)}d overdue</span>`:dl<30?`<span style="color:var(--amb);font-weight:600">${dl}d left</span>`:`${dl}d remaining`;
+    return`<div class="proj-card">
+      <div class="pc-hdr">
+        <div style="flex:1"><div class="pc-name">${atRisk?'<span style="color:var(--red)">⚑ </span>':''}${p.name}</div><div class="pc-meta">${p.owner} · ${dlStr}</div></div>
+        ${db}
+      </div>
+      <div class="pc-prog"><div class="pc-pct"><span>Completion</span><span>${p.pct}%</span></div><div class="pc-bar"><div class="pc-fill" style="width:${p.pct}%;background:${fc}"></div></div></div>
+      <div class="pc-stats">
+        <div><div class="pc-sl">Open</div><div class="pc-sv">${p.open}</div></div>
+        <div><div class="pc-sl">Closed</div><div class="pc-sv" style="color:var(--green)">${p.closed}</div></div>
+        <div><div class="pc-sl">Delayed</div><div class="pc-sv ${delayed>0?'risk':''}">${delayed}</div></div>
+      </div>
+      <div class="pc-foot">
+        <span>Start: ${new Date(p.start).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'})}</span>
+        <span ${atRisk?'style="color:var(--red);font-weight:600"':''}>End: ${e.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'})}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+init();
+</script>
+</body>
+</html>
